@@ -1,5 +1,8 @@
 node_modules/
+# Secrets: every .env variant is ignored; only the examples are shared.
 .env
+.env.*
+!.env.example
 dist/
 build/
 .DS_Store
