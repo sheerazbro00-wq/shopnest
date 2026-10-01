@@ -19,7 +19,8 @@ function hiddenPrompt() {
   const lines = [];
   let waiting = null;
   let closed = false;
-  rl.on("line", (line) => {
+  rl.on("line", (raw) => {
+    const line = raw.replace(/^﻿/, ""); // Windows pipes may prepend a byte-order mark
     if (waiting) waiting.resolve(line);
     else lines.push(line);
     waiting = null;
