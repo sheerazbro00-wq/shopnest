@@ -1,0 +1,125 @@
+.page-content {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 75px 40px;
+}
+
+.page-content--wide {
+  max-width: 1200px;
+}
+
+.page-content .section-header {
+  margin-bottom: 50px;
+}
+
+.page-content .section-header__title {
+  margin: 0;
+  font-family: var(--font-header);
+  font-size: 36px;
+  font-weight: 400;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.page-content--compact .section-header__title {
+  font-size: 30.6px;
+}
+
+/* ---------- Rich text ---------- */
+
+.page-content .rte {
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 1.4;
+  letter-spacing: 0.025em;
+}
+
+.page-content .rte h2,
+.page-content .rte h3 {
+  margin: 60px 0 25px;
+  font-family: var(--font-header);
+  font-size: 23.4px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: uppercase;
+}
+
+.page-content .rte > :first-child {
+  margin-top: 0;
+}
+
+.page-content .rte p {
+  margin: 0 0 25px;
+}
+
+.page-content .rte strong,
+.page-content .rte b {
+  font-weight: 700;
+}
+
+.page-content .rte a {
+  font-weight: 400;
+  color: var(--color-text);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  transition: border-color 0.2s ease;
+}
+
+.page-content .rte a:hover,
+.page-content .rte a:focus-visible {
+  border-bottom-color: var(--color-text);
+}
+
+.page-content .rte ul {
+  margin: 0 0 25px;
+  padding: 0;
+  list-style: none;
+}
+
+/* Bulleted policy list (Return & Exchange) */
+.page-content .rte .policy-list {
+  padding-left: 30px;
+  list-style: disc;
+}
+
+.page-content .rte .policy-list li + li {
+  margin-top: 0;
+}
+
+@media (max-width: 768px) {
+  .page-content .rte .policy-list {
+    padding-left: 22px;
+  }
+
+  .page-content .rte .policy-list li + li {
+    margin-top: 6px;
+  }
+}
+
+@media (max-width: 768px) {
+  .page-content {
+    padding: 40px 17px;
+  }
+
+  .page-content .section-header {
+    margin-bottom: 30px;
+  }
+
+  .page-content .section-header__title {
+    font-size: 30.6px;
+  }
+
+  .page-content .rte {
+    font-size: 16.56px;
+  }
+
+  .page-content .rte h2,
+  .page-content .rte h3 {
+    font-size: 22.32px;
+  }
+
+  .page-content .rte p {
+    margin-bottom: 15px;
+  }
+}

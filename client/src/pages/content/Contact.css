@@ -1,0 +1,223 @@
+/* Contact form (Impulse "form-vertical") */
+
+.contact-form__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 10px;
+}
+
+.contact-field {
+  margin-bottom: 30px;
+}
+
+.contact-field label {
+  display: block;
+  margin-bottom: 10px;
+  font-size: 14.4px;
+  font-weight: 300;
+  line-height: 1.4;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.contact-field .input-full {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0.025em;
+  color: var(--color-text);
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color 0.2s ease;
+}
+
+.contact-field input.input-full {
+  height: 43px;
+}
+
+.contact-field textarea.input-full {
+  min-height: 144px;
+  resize: vertical;
+}
+
+.contact-field .input-full:focus {
+  outline: none;
+  border-color: var(--color-text);
+}
+
+.contact-field.has-error .input-full {
+  border-color: var(--color-savings);
+}
+
+.page-content .rte .contact-field__error {
+  margin: 8px 0 0;
+  font-size: 14px;
+  letter-spacing: 0.02em;
+  color: var(--color-savings);
+}
+
+/* Error message sits in the field's bottom margin so the layout doesn't jump much */
+.contact-field.has-error {
+  margin-bottom: 20px;
+}
+
+.page-content .rte .contact-form__banner {
+  margin: 0 0 25px;
+  padding: 12px 16px;
+  border: 1px solid var(--color-savings);
+  font-size: 15.3px;
+  color: var(--color-savings);
+  text-align: center;
+}
+
+.contact-form__trap {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.contact-form__submit {
+  display: block;
+  min-width: 96px;
+  margin: 0 auto 30px;
+  font-weight: 700;
+}
+
+.contact-form__submit:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.page-content .rte .contact-form__disclaimer {
+  margin: 0 0 15px;
+  font-size: 15.3px;
+  font-weight: 300;
+  text-align: center;
+}
+
+/* ---------- Success note ---------- */
+
+.contact-note {
+  padding: 40px 30px;
+  border: 1px solid var(--color-border);
+  text-align: center;
+  font-size: 16px;
+  line-height: 1.6;
+  animation: contact-in 0.35s ease-out;
+}
+
+.contact-note:focus {
+  outline: none;
+}
+
+.contact-note__icon {
+  width: 44px;
+  height: 44px;
+  margin-bottom: 14px;
+  fill: none;
+  stroke: var(--color-text);
+  stroke-width: 1.2;
+}
+
+.page-content .rte .contact-note__title {
+  margin: 0 0 6px;
+  font-family: var(--font-header);
+  font-size: 22px;
+  text-transform: uppercase;
+}
+
+.page-content .rte .contact-note p {
+  margin: 0;
+}
+
+.contact-note__again {
+  margin-top: 22px;
+  padding: 0 0 2px;
+  border: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  background: none;
+  font-family: var(--font-body);
+  font-size: 15px;
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.contact-note__again:hover {
+  border-bottom-color: var(--color-text);
+}
+
+@keyframes contact-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-note {
+    animation: none;
+  }
+}
+
+/* ---------- Phone / hours text ---------- */
+
+.page-content .rte .contact-info {
+  margin-top: 75px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+.page-content .rte .contact-info p {
+  margin: 0;
+}
+
+.page-content .rte .contact-info .contact-info__address {
+  margin-top: 12px;
+}
+
+.page-content .rte .contact-info a {
+  font-weight: 300;
+}
+
+@media (max-width: 768px) {
+  .contact-form__row {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-field label {
+    font-size: 13.25px;
+  }
+
+  .contact-field .input-full {
+    font-size: 16px; /* 16px stops iOS zooming into the field */
+  }
+
+  .contact-field input.input-full {
+    height: 40px;
+  }
+
+  .contact-field textarea.input-full {
+    min-height: 130px;
+  }
+
+  .page-content .rte .contact-form__disclaimer {
+    font-size: 14px;
+  }
+
+  .contact-note {
+    padding: 32px 18px;
+  }
+
+  .page-content .rte .contact-info {
+    margin-top: 40px;
+  }
+}

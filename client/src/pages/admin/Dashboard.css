@@ -1,0 +1,327 @@
+.dash {
+  display: grid;
+  gap: 16px;
+  transition: opacity 0.2s ease;
+}
+
+.dash.is-stale {
+  opacity: 0.55;
+}
+
+/* Grid items default to min-width:auto and would stretch to fit wide tables */
+.dash > *,
+.dash-row > *,
+.dash-stats > * {
+  min-width: 0;
+}
+
+/* ---------- Stat tiles ---------- */
+
+.dash-stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.stat {
+  padding: 16px;
+}
+
+.stat__label {
+  margin: 0;
+  color: var(--adm-text-2);
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.stat__value {
+  margin: 6px 0 8px;
+  font-size: 24px;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.stat--hero .stat__value {
+  font-size: 28px;
+}
+
+.stat__delta {
+  display: flex;
+  align-items: flex-start;
+  gap: 4px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 550;
+}
+
+.stat__delta svg {
+  flex: 0 0 12px;
+  width: 12px;
+  height: 12px;
+  margin-top: 2px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.stat__delta--up {
+  color: var(--tone-success);
+}
+
+.stat__delta--down {
+  color: var(--tone-critical);
+}
+
+.stat__delta--flat {
+  color: var(--adm-text-2);
+}
+
+.stat__vs {
+  color: var(--adm-text-3);
+  font-weight: 400;
+}
+
+/* ---------- Chart ---------- */
+
+.dash-chart {
+  padding-bottom: 8px;
+}
+
+.sales-chart {
+  position: relative;
+  padding: 8px 8px 0;
+}
+
+.sales-chart svg {
+  display: block;
+  touch-action: pan-y;
+  cursor: crosshair;
+}
+
+.sales-chart svg:focus-visible {
+  outline: 2px solid #005bd3;
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.sales-chart__grid {
+  stroke: #ebebeb;
+  stroke-width: 1;
+}
+
+.sales-chart__tick {
+  fill: var(--adm-text-3);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+.sales-chart__area {
+  fill: var(--adm-series);
+  opacity: 0.1;
+}
+
+.sales-chart__line {
+  fill: none;
+  stroke: var(--adm-series);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.sales-chart__cross {
+  stroke: #b5b5b5;
+  stroke-width: 1;
+}
+
+.sales-chart__dot {
+  fill: var(--adm-series);
+  stroke: #fff;
+  stroke-width: 2;
+}
+
+.sales-chart__tip {
+  position: absolute;
+  top: 8px;
+  transform: translateX(-50%);
+  min-width: 150px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: #fff;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.14), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  pointer-events: none;
+}
+
+.sales-chart__tip p {
+  margin: 0;
+}
+
+.sales-chart__tip-date {
+  color: var(--adm-text-2);
+  font-size: 12px;
+}
+
+.sales-chart__tip-value {
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.sales-chart__tip-sub {
+  color: var(--adm-text-2);
+  font-size: 12px;
+}
+
+/* ---------- Things to do + top products ---------- */
+
+.dash-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+  gap: 16px;
+}
+
+.dash-todo ul,
+.dash-top ol {
+  margin: 8px 0 0;
+  padding: 0 8px 8px;
+  list-style: none;
+}
+
+.adm .dash-todo a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 8px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: background-color 0.15s ease;
+}
+
+.adm .dash-todo a:hover {
+  background: var(--adm-surface-2);
+}
+
+.dash-todo li + li {
+  border-top: 1px solid var(--adm-border);
+}
+
+.dash-todo__count {
+  min-width: 36px;
+  font-size: 18px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.dash-todo__arrow {
+  margin-left: auto;
+  color: var(--adm-text-3);
+  font-size: 20px;
+  line-height: 1;
+}
+
+.dash-top li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+}
+
+.dash-top li + li {
+  border-top: 1px solid var(--adm-border);
+}
+
+.dash-top__thumb {
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--adm-surface-2);
+  box-shadow: 0 0 0 1px var(--adm-border);
+}
+
+.dash-top__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 20%;
+}
+
+.dash-top__info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 13px;
+}
+
+.adm .dash-top__name {
+  overflow: hidden;
+  font-weight: 600;
+  text-decoration: none;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.adm .dash-top__name:hover {
+  text-decoration: underline;
+}
+
+.dash-top__nums {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-left: auto;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.dash-top__nums strong {
+  font-weight: 600;
+}
+
+.dash-recent__head {
+  padding-bottom: 12px;
+}
+
+.dash-empty {
+  margin: 0;
+  padding: 24px 16px;
+  color: var(--adm-text-2);
+  text-align: center;
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 1100px) {
+  .dash-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 800px) {
+  .dash-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .dash,
+  .dash-stats,
+  .dash-row {
+    gap: 12px;
+  }
+
+  .stat {
+    padding: 12px;
+  }
+
+  .stat__value,
+  .stat--hero .stat__value {
+    font-size: 20px;
+  }
+
+  .stat__vs {
+    display: none;
+  }
+}

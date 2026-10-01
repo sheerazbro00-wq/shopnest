@@ -1,0 +1,244 @@
+.careers {
+  padding-bottom: 75px;
+}
+
+.careers-section {
+  max-width: 1000px;
+  margin: 75px auto;
+}
+
+.careers-title {
+  margin: 0 0 25px;
+  font-family: var(--font-header);
+  font-size: 30.6px;
+  font-weight: 400;
+  line-height: 1;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.careers-intro {
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 1.4;
+  letter-spacing: 0.025em;
+  text-align: center;
+}
+
+.careers-intro p {
+  margin: 0;
+}
+
+/* ---------- Open positions ---------- */
+
+.careers-positions .careers-title {
+  margin-bottom: 50px;
+}
+
+.careers-jobs {
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 1.4;
+  letter-spacing: 0.025em;
+}
+
+.careers-jobs p {
+  margin: 0 0 10px;
+}
+
+.careers-jobs ul {
+  margin: 0 0 20px;
+  padding-left: 22px;
+  list-style: disc;
+}
+
+.careers-jobs li + li {
+  margin-top: 4px;
+}
+
+.careers-jobs strong {
+  font-weight: 700;
+}
+
+.careers-jobs a:not(.btn) {
+  color: var(--color-text);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.careers-apply {
+  margin-top: 10px;
+}
+
+.careers-jobs .careers-apply-note {
+  margin: 14px 0 0;
+  font-size: 15px;
+  color: #555;
+}
+
+/* ---------- Why join (image + text) ---------- */
+
+.careers-feature {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 42px;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+.careers-feature__text {
+  padding-right: 60px;
+  font-size: 18px;
+  font-weight: 300;
+  line-height: 1.4;
+  letter-spacing: 0.025em;
+}
+
+.careers-feature__text p {
+  margin: 0 0 25px;
+}
+
+.careers-feature__text p:last-child {
+  margin-bottom: 0;
+}
+
+.careers-feature__text strong {
+  font-weight: 700;
+}
+
+.careers-feature__image {
+  aspect-ratio: 598 / 539;
+  overflow: hidden;
+  background: var(--color-image-bg);
+}
+
+.careers-feature__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 88% center; /* wide banner: keep the colleagues in frame */
+}
+
+/* ---------- What we offer ---------- */
+
+.careers-offer {
+  max-width: 1240px;
+  padding: 0 40px;
+}
+
+.careers-offer .careers-title {
+  font-size: 30px;
+  margin-bottom: 40px;
+}
+
+.careers-offer__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.careers-offer__card {
+  padding: 26px 22px 28px;
+  border: 1px solid var(--color-border);
+  background: #f7f8f9;
+  text-align: center;
+}
+
+.careers-offer__card h3 {
+  margin: 0 0 14px;
+  font-family: var(--font-header);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.careers-offer__card p {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 300;
+  line-height: 1.5;
+  letter-spacing: 0.02em;
+  color: #333;
+}
+
+/* ---------- Tablet / mobile ---------- */
+
+@media (max-width: 980px) {
+  .careers-offer__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .careers {
+    padding-bottom: 40px;
+  }
+
+  .careers-section {
+    margin: 40px auto;
+  }
+
+  .careers-title {
+    font-size: 26.28px;
+  }
+
+  .careers-positions .careers-title {
+    margin-bottom: 30px;
+  }
+
+  .careers-intro,
+  .careers-jobs,
+  .careers-feature__text {
+    font-size: 16.56px;
+  }
+
+  .careers-feature {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    padding: 0 17px;
+  }
+
+  /* image first on mobile, as on the reference store */
+  .careers-feature__image {
+    order: -1;
+  }
+
+  .careers-feature__text {
+    padding: 0 3px;
+  }
+
+  .careers-feature__text p {
+    margin-bottom: 15px;
+  }
+
+  .careers-offer {
+    padding: 0 17px;
+  }
+
+  .careers-offer .careers-title {
+    font-size: 26.28px;
+    margin-bottom: 25px;
+  }
+
+  .careers-offer__grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .careers-offer__card {
+    padding: 22px 18px;
+  }
+
+  .careers-offer__card h3 {
+    font-size: 18px;
+  }
+
+  .careers-offer__card p {
+    font-size: 14px;
+  }
+}

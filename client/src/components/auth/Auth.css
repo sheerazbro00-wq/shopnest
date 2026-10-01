@@ -1,0 +1,198 @@
+/* Builds on the checkout tokens (.co) — same Shopify look as Lama's sign-in page. */
+.co.auth {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  min-height: 100dvh;
+  background: #fafafa;
+}
+
+.auth__header {
+  display: flex;
+  justify-content: center;
+  padding: 40px 24px 0;
+}
+
+.auth__header .co-logo {
+  font-size: 40px;
+}
+
+.auth__main {
+  display: flex;
+  flex: 1 0 auto;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 24px;
+}
+
+.auth__card {
+  width: 100%;
+  max-width: 380px;
+}
+
+.co .auth__title {
+  font-size: 20px;
+}
+
+.auth__subtitle {
+  margin: 6px 0 24px;
+  color: rgba(0, 0, 0, 0.56);
+}
+
+.auth__subtitle a,
+.auth__alt a {
+  color: #000;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.auth form .co-field input {
+  background: #fff;
+}
+
+.auth .co-row {
+  column-gap: 10px;
+}
+
+.auth__forgot {
+  display: block;
+  width: fit-content;
+  margin: -2px 0 16px auto;
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.auth__hint {
+  margin: -4px 0 12px;
+  color: rgba(0, 0, 0, 0.56);
+  font-size: 12px;
+}
+
+.auth .co-check {
+  margin: 4px 0 18px;
+}
+
+.auth .co-submit {
+  height: 48px;
+}
+
+.auth__divider {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 18px 0;
+  color: rgba(0, 0, 0, 0.56);
+}
+
+.auth__divider::before,
+.auth__divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e3e3e3;
+}
+
+.auth__secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 48px;
+  border: 1px solid #d0d0d0;
+  border-radius: var(--co-radius);
+  background: #fff;
+  font-weight: 600;
+  transition: border-color 0.2s ease;
+}
+
+.auth__secondary:hover {
+  border-color: #000;
+}
+
+.auth__terms {
+  margin-top: 20px;
+  color: rgba(0, 0, 0, 0.56);
+  font-size: 12px;
+  text-align: center;
+}
+
+.auth__terms a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.auth__alt {
+  margin-top: 20px;
+  text-align: center;
+}
+
+.auth__success {
+  margin-bottom: 20px;
+  padding: 14px 16px;
+  border: 1px solid #b7dfc3;
+  border-radius: var(--co-radius);
+  background: #f1faf3;
+  color: #14532d;
+}
+
+.auth__dev {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+/* show / hide password */
+.co-field--password input {
+  padding-right: 46px;
+}
+
+.auth__eye {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 49px;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: #707070;
+}
+
+.auth__eye:hover {
+  color: #000;
+}
+
+.auth__eye svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+}
+
+.auth__footer {
+  padding: 0 24px 22px;
+  text-align: center;
+}
+
+@media (max-width: 560px) {
+  .auth__header .co-logo {
+    font-size: 36px;
+  }
+
+  .auth__main {
+    align-items: flex-start;
+    padding: 80px 24px 40px;
+  }
+
+  .auth .co-row {
+    display: grid;
+  }
+}

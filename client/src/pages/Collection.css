@@ -1,0 +1,104 @@
+.collection-page {
+  padding-bottom: 40px;
+}
+
+.collection-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  margin: 45px 0 15px;
+}
+
+.collection-toolbar__filter,
+.collection-toolbar__sort {
+  height: 44px;
+  border: 1px solid var(--color-border);
+  background-color: #fff;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 400;
+  color: #000;
+}
+
+.collection-toolbar__filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px;
+}
+
+.collection-toolbar__filter .icon {
+  width: 24px;
+  height: 24px;
+}
+
+.collection-toolbar__sort {
+  width: 245px;
+  padding: 8px 28px 8px 10px;
+  border-radius: 0;
+  letter-spacing: 0.025em;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 499 285'%3E%3Cpath d='M0 35C0 20.8 8.5 8.1 21.6 2.7 34.7-2.8 49.7.2 59.8 10.2l189.7 189.8L439.2 10.2c8.8-8.8 21.7-12.3 33.8-9 12.1 3.2 21.5 12.7 24.8 24.7 3.2 12.1-.2 25-9.1 33.8L274.2 274.2c-6.5 6.6-15.4 10.3-24.7 10.3s-18.2-3.7-24.8-10.3L10.3 59.7C3.7 53.2 0 44.3 0 35Z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 11px;
+}
+
+.collection-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: var(--grid-gutter);
+}
+
+.collection-loading {
+  padding: 20px 0 30px;
+  font-size: 18px;
+  text-align: center;
+}
+
+.collection-empty {
+  padding: 60px 0;
+  text-align: center;
+  font-size: 16px;
+}
+
+.collection-empty .btn {
+  margin-top: 20px;
+}
+
+.collection-empty__title {
+  margin-bottom: 25px;
+  font-family: var(--font-header);
+  font-size: 30.6px;
+  font-weight: 400;
+  text-transform: uppercase;
+}
+
+@media (max-width: 768px) {
+  .collection-toolbar {
+    margin: 23px 0 30px;
+  }
+
+  .collection-toolbar__filter,
+  .collection-toolbar__sort {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+  }
+
+  .collection-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 17px;
+  }
+
+  .collection-grid .grid-product {
+    margin-bottom: 15px;
+  }
+
+  .collection-grid .grid-product__price {
+    font-size: 15.3px;
+  }
+}

@@ -1,0 +1,132 @@
+.cart-page {
+  padding: 75px var(--page-gutter) 120px;
+}
+
+.cart-page--empty {
+  padding-top: 155px;
+  padding-bottom: 140px;
+}
+
+.cart-page__header {
+  margin-bottom: 51px;
+  text-align: center;
+}
+
+.cart-page--empty .cart-page__header {
+  margin-bottom: 0;
+}
+
+.cart-page__title {
+  margin-bottom: 10px;
+  font-family: var(--font-header);
+  font-size: 36px;
+  font-weight: 400;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.cart-page--empty .cart-page__header p {
+  margin-bottom: 10px;
+}
+
+.text-link {
+  display: inline;
+  padding: 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  transition: border-color 0.2s ease;
+}
+
+.text-link:hover {
+  border-bottom-color: currentColor;
+}
+
+.cart__page {
+  display: grid;
+  grid-template-columns: minmax(0, 784fr) minmax(0, 476fr);
+  column-gap: 100px;
+  align-items: start;
+}
+
+.cart__summary {
+  padding: 30px;
+  background: #f6f6f6;
+}
+
+.cart__summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.cart__summary .cart__checkout {
+  margin-bottom: 25px;
+}
+
+.cart__summary .cart__note {
+  margin-bottom: 20px;
+}
+
+.cart__summary-warning {
+  margin: -12px 0 20px;
+  color: var(--color-savings);
+  font-size: 15px;
+  text-align: center;
+}
+
+.cart-recent {
+  padding-top: 55px;
+  border-top: 1px solid var(--color-border);
+}
+
+.cart-recent .product-row__title {
+  margin-bottom: 51px;
+}
+
+.product-row.cart-recent {
+  margin-top: 0;
+}
+
+@media (min-width: 769px) and (max-width: 1100px) {
+  .cart__page {
+    grid-template-columns: minmax(0, 1fr) 340px;
+    column-gap: 40px;
+  }
+}
+
+@media (max-width: 768px) {
+  .cart-page {
+    padding: 40px var(--page-gutter) 60px;
+  }
+
+  .cart-page--empty {
+    padding-top: 80px;
+    padding-bottom: 80px;
+  }
+
+  .cart-page__header {
+    margin-bottom: 30px;
+  }
+
+  .cart-page__title {
+    font-size: 30.6px;
+  }
+
+  .cart__page {
+    display: block;
+  }
+
+  .cart__summary {
+    margin-top: 20px;
+    padding: 0;
+    background: none;
+  }
+
+  .cart-recent {
+    padding-top: 40px;
+  }
+
+  .cart-recent .product-row__title {
+    margin-bottom: 31px;
+  }
+}

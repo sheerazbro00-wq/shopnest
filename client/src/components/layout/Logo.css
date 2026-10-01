@@ -1,0 +1,22 @@
+.site-logo {
+  display: inline-block;
+  color: var(--color-text);
+  line-height: 1;
+}
+
+.site-logo__text {
+  display: block;
+  font-family: var(--font-body);
+  font-weight: 200;
+  font-size: 27px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 23px;
+}
+
+@media (max-width: 768px) {
+  .site-logo__text {
+    font-size: 22px;
+    line-height: 20px;
+  }
+}
