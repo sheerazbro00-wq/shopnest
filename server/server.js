@@ -12,17 +12,29 @@ const contactRoutes = require("./routes/contactRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const { stripeWebhook } = require("./controllers/orderController");
 
-connectDB();
-
 const app = express();
 
-// Render (and most hosts) sit behind one reverse proxy; trusting it makes
-// req.ip the visitor's address, which the rate limiters key on.
+// Hosts like Vercel put one reverse proxy in front of the app; trusting it
+// makes req.ip the visitor's address, which the rate limiters key on.
 app.set("trust proxy", 1);
 
 // Browsers may only call the API from our own storefront (CLIENT_URL).
 // When it's unset (local dev) every origin is allowed.
 app.use(cors(clientOrigins.length ? { origin: clientOrigins } : undefined));
+
+app.get("/", (req, res) => res.send("ShopNest API is running"));
+
+// Every API route needs the database. Waiting here (instead of connecting once
+// at startup) also works on serverless hosts, where there is no startup step.
+app.use("/api", async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch {
+    res.status(503).json({ message: "The store is temporarily unavailable. Please try again in a moment." });
+  }
+});
+
 // Stripe signs the exact bytes it sends, so this route must skip JSON parsing.
 app.post("/api/orders/webhook", express.raw({ type: "application/json" }), stripeWebhook);
 app.use(express.json({ limit: "100kb" }));
@@ -33,8 +45,6 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/account", accountRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/admin", adminRoutes);
-
-app.get("/", (req, res) => res.send("ShopNest API is running"));
 
 app.use((err, req, res, next) => {
   const status = err.status || 500;
@@ -47,5 +57,12 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// Run directly (`node server.js`, local dev): listen on a port.
+// Imported by a serverless host (Vercel): it uses the exported app instead.
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
+  connectDB().catch(() => process.exit(1));
+  app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+}
+
+module.exports = app;
