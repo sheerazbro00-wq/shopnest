@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Live (2026-10-03) — final owner checks T5.4 and T5.5 pending |
+| **Status** | Done (2026-10-03) — every acceptance criterion verified on the live store |
 | **Owner** | ShopNest |
 | **Created** | 2026-10-03 |
 | **Next steps** | `plan.md` (how) → `tasks.md` (steps) → implementation |

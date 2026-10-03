@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Spec / Plan** | [spec.md](spec.md) · [plan.md](plan.md) (both approved 2026-10-03) |
-| **Status** | Verified live; 2 owner checks left (T5.4 link click, T5.5 Vercel logs) |
+| **Status** | Done (2026-10-03) — 20/20 tasks verified |
 
 Small steps in build order. Each task is done only when its **Check** passes.
 `[P]` = can be done in parallel with the task before it.
@@ -78,6 +78,6 @@ Small steps in build order. Each task is done only when its **Check** passes.
 - [x] **T5.2** Card order, **tab closed on Stripe's success redirect** → receipt + alert
   still arrive via the webhook. *(AC-3.3)*
 - [x] **T5.3** Card checkout cancelled on Stripe → no email. *(AC-3.4)*
-- [ ] **T5.4** Forgot password → email → link resets → second use fails. *(US-1)*
-- [ ] **T5.5** Vercel logs contain no keys, tokens or reset links. *(R-5)*
+- [x] **T5.4** Forgot password → email → link resets → second use fails. *(US-1)*
+- [x] **T5.5** Vercel logs contain no keys, tokens or reset links. *(R-5)*
 - [x] **T5.6** Delete the test orders; set spec status to **Done**.
