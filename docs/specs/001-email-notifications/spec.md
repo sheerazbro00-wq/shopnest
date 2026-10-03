@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Approved (2026-10-03) |
+| **Status** | Live (2026-10-03) — final owner checks T5.4 and T5.5 pending |
 | **Owner** | ShopNest |
 | **Created** | 2026-10-03 |
 | **Next steps** | `plan.md` (how) → `tasks.md` (steps) → implementation |

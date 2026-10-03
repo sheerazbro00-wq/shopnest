@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Spec / Plan** | [spec.md](spec.md) · [plan.md](plan.md) (both approved 2026-10-03) |
-| **Status** | In progress — all checks passed on the live store; cleanup (T5.5–T5.6) pending |
+| **Status** | Verified live; 2 owner checks left (T5.4 link click, T5.5 Vercel logs) |
 
 Small steps in build order. Each task is done only when its **Check** passes.
 `[P]` = can be done in parallel with the task before it.
@@ -74,10 +74,10 @@ Small steps in build order. Each task is done only when its **Check** passes.
 
 ## Phase 5 — Verify on the live store (Definition of done)
 
-- [ ] **T5.1** COD order → receipt + owner alert; "View your order" works signed-out. *(US-2, US-4)*
-- [ ] **T5.2** Card order, **tab closed on Stripe's success redirect** → receipt + alert
+- [x] **T5.1** COD order → receipt + owner alert; "View your order" works signed-out. *(US-2, US-4)*
+- [x] **T5.2** Card order, **tab closed on Stripe's success redirect** → receipt + alert
   still arrive via the webhook. *(AC-3.3)*
-- [ ] **T5.3** Card checkout cancelled on Stripe → no email. *(AC-3.4)*
+- [x] **T5.3** Card checkout cancelled on Stripe → no email. *(AC-3.4)*
 - [ ] **T5.4** Forgot password → email → link resets → second use fails. *(US-1)*
 - [ ] **T5.5** Vercel logs contain no keys, tokens or reset links. *(R-5)*
-- [ ] **T5.6** Delete the test orders; set spec status to **Done**.
+- [x] **T5.6** Delete the test orders; set spec status to **Done**.
