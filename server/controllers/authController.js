@@ -1,6 +1,9 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 const { clientUrl } = require("../config/client");
+const { emailEnabled } = require("../config/email");
+const { sendEmail } = require("../services/email/send");
+const passwordReset = require("../services/email/templates/passwordReset");
 
 const generateToken = (id) => jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: "30d" });
 
@@ -69,8 +72,12 @@ const forgotPassword = async (req, res) => {
     const token = user.createPasswordResetToken();
     await user.save({ validateBeforeSave: false });
     const link = `${clientUrl}/account/reset-password?token=${token}`;
-    // TODO(email): send `link` with an email service (Resend / Gmail SMTP) before going live.
-    if (process.env.NODE_ENV !== "production") console.log(`[dev] Password reset link for ${email}: ${link}`);
+    if (emailEnabled) {
+      // The reply is identical whether or not this succeeds (spec 001, AC-1.3 / AC-1.4).
+      await sendEmail({ to: email, tag: "password-reset", ...passwordReset({ name: user.name, link }) });
+    } else if (process.env.NODE_ENV !== "production") {
+      console.log(`[dev] Password reset link for ${email}: ${link}`); // email off: local development only (R-8)
+    }
   }
 
   res.json({ message: "If an account exists for this email, we've sent a link to reset your password." });

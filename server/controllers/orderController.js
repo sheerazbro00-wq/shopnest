@@ -6,6 +6,7 @@ const Product = require("../models/Product");
 const Counter = require("../models/Counter");
 const { CURRENCY, FREE_SHIPPING_MIN, SHIPPING_FEE, MAX_QTY, MAX_LINES } = require("../config/shop");
 const { clientUrl } = require("../config/client");
+const { notifyOrderConfirmed } = require("../services/orderNotifications");
 
 // Card payments switch on only when a real-looking key is configured, so the
 // store still works (Cash on Delivery) with the placeholder key.
@@ -73,7 +74,13 @@ function readCustomer(body) {
 // Marks a card order paid once Stripe confirms it. Used by both the webhook
 // and the thank-you page, so it must be idempotent.
 async function applyStripeSession(order, session) {
-  if (order.isPaid || session.payment_status !== "paid") return order;
+  if (order.isPaid) {
+    // Already marked paid by the other trigger. Its emails are claimed, so this is
+    // a no-op — unless that send failed, in which case this is the retry (R-1, R-2).
+    await notifyOrderConfirmed(order);
+    return order;
+  }
+  if (session.payment_status !== "paid") return order;
   if (session.amount_total !== Math.round(order.totalPrice * 100)) {
     console.error(`Amount mismatch on order ${order.orderNumber}`);
     return order;
@@ -87,7 +94,9 @@ async function applyStripeSession(order, session) {
     status: session.payment_status,
     email: session.customer_details?.email,
   };
-  return order.save();
+  await order.save();
+  await notifyOrderConfirmed(order); // receipt + owner alert, once (spec 001, US-3)
+  return order;
 }
 
 const publicOrder = (order) => {
@@ -126,6 +135,8 @@ const checkout = async (req, res) => {
   const { accessToken } = await Order.findById(order._id).select("+accessToken").lean();
   const result = { orderId: order._id, token: accessToken };
 
+  // Confirmed orders (COD) get their emails now; card orders wait for payment.
+  await notifyOrderConfirmed(order);
   if (paymentMethod === "COD") return res.status(201).json(result);
 
   // Card: hand off to Stripe's hosted Checkout page (card data never touches our server).

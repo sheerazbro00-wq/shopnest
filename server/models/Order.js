@@ -61,6 +61,11 @@ const orderSchema = new mongoose.Schema(
         by: String, // staff name, or "Stripe" / "Customer"
       },
     ],
+    // When each confirmation email was claimed (spec 001, R-1). null = not sent yet.
+    notifications: {
+      confirmation: { type: Date, default: null }, // customer receipt
+      ownerAlert: { type: Date, default: null }, // new-order alert to the store
+    },
   },
   { timestamps: true }
 );
