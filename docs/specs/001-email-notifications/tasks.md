@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Spec / Plan** | [spec.md](spec.md) · [plan.md](plan.md) (both approved 2026-10-03) |
-| **Status** | Done (2026-10-03) — 20/20 tasks verified |
+| **Status** | Done (2026-10-03) — all 23 tasks verified |
 
 Small steps in build order. Each task is done only when its **Check** passes.
 `[P]` = can be done in parallel with the task before it.
