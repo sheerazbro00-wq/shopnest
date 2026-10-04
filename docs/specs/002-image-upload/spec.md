@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Approved (2026-10-04) — in progress |
+| **Status** | Done (2026-10-04) — every acceptance criterion verified, live phone test passed |
 | **Owner** | ShopNest |
 | **Created** | 2026-10-04 |
 | **Next steps** | `plan.md` (how) → `tasks.md` (steps) → implementation |

@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Spec / Plan** | [`spec.md`](spec.md) · [`plan.md`](plan.md) |
-| **Status** | In progress — Phases 1–5 done; go-live next |
+| **Status** | Done (2026-10-04) — all 31 tasks complete |
 
 Each task is small enough to check on its own. The ids in brackets say which acceptance
 criterion (AC) or rule (R) the task serves.
@@ -58,9 +58,9 @@ criterion (AC) or rule (R) the task serves.
 
 ## Phase 6 — Go live
 
-- [ ] **T6.1** Add `CLOUDINARY_URL` to Vercel (`shopnest-api`, type Secret) via clipboard. [R-2]
-- [ ] **T6.2** Commit, push, wait for both deploys.
-- [ ] **T6.3** Owner, on their phone: upload a gallery photo and a camera photo on the live admin. [AC-1.1]
-- [ ] **T6.4** Fix the "Tshirts" product with a real photo and publish it. [DoD]
-- [ ] **T6.5** Secret check: repo, browser network log and Vercel logs contain no API secret. [R-2]
-- [ ] **T6.6** Mark spec and tasks Done.
+- [x] **T6.1** Add `CLOUDINARY_URL` to Vercel (`shopnest-api`, type Secret) via clipboard. [R-2]
+- [x] **T6.2** Commit, push, wait for both deploys.
+- [x] **T6.3** Owner, on their phone: upload a gallery photo and a camera photo on the live admin. [AC-1.1] — gallery ("Ring") and camera ("Bag", 1800×2400, no GPS) on 2026-10-04
+- [x] **T6.4** Fix the "Tshirts" product with a real photo and publish it. [DoD] — owner replaced it with a camera-photo product ("Bag")
+- [x] **T6.5** Secret check: repo, browser network log and Vercel logs contain no API secret. [R-2]
+- [x] **T6.6** Mark spec and tasks Done.
