@@ -106,7 +106,7 @@
 }
 
 .grid-product__price--sale {
-  color: var(--color-savings);
+  color: #000;
 }
 
 .color-swatch-group {
