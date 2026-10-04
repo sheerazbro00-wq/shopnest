@@ -3,6 +3,7 @@ const Product = require("../models/Product");
 const collections = require("../config/collections");
 const { httpError, clean } = require("../utils/validation");
 const { sanitizeHtml } = require("../utils/sanitizeHtml");
+const { unwrapImageLink, isSearchPage, SEARCH_PAGE_MESSAGE } = require("../utils/imageLinks");
 
 const PAGE_SIZE = 25;
 const MAX_PRICE = 1_000_000;
@@ -64,17 +65,20 @@ function readProduct(body = {}) {
   }
   if (!out.variants.length && !errors.variants) errors.variants = "Add at least one size";
 
-  // Images: https URLs only (they're rendered as <img src>).
+  // Images: https URLs only (they're rendered as <img src>), never a search page (spec 002 AC-3.1).
   const images = Array.isArray(body.images) ? body.images.slice(0, 12) : [];
   out.images = [];
   for (const raw of images) {
+    let url;
     try {
-      const url = new URL(clean(raw, 600));
+      url = unwrapImageLink(new URL(clean(raw, 600)));
       if (url.protocol !== "https:") throw new Error();
-      if (!out.images.includes(url.href)) out.images.push(url.href);
     } catch {
       errors.images = "Image links must be full https:// URLs";
+      continue;
     }
+    if (isSearchPage(url)) errors.images = SEARCH_PAGE_MESSAGE;
+    else if (!out.images.includes(url.href)) out.images.push(url.href);
   }
   if (!out.images.length && !errors.images) errors.images = "Add at least one image";
 

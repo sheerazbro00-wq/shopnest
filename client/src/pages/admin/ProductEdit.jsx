@@ -8,6 +8,7 @@ import ConfirmDialog from "../../components/admin/ConfirmDialog";
 import Toast, { useToast } from "../../components/admin/Toast";
 import { rupees } from "../../components/admin/format";
 import { sized } from "../../utils/format";
+import ImagesEditor from "./ImagesEditor";
 import "./ProductEdit.css";
 
 const DEFAULT_SIZES = ["S", "M", "L", "XL", "XXL"];
@@ -81,87 +82,6 @@ function Field({ id, label, error, hint, children }) {
       ) : (
         hint && <p className="pe-hint">{hint}</p>
       )}
-    </div>
-  );
-}
-
-function ImagesEditor({ images, onChange, error }) {
-  const [url, setUrl] = useState("");
-  const [urlError, setUrlError] = useState("");
-  const [broken, setBroken] = useState({});
-
-  const add = () => {
-    try {
-      const u = new URL(url.trim());
-      if (u.protocol !== "https:") throw new Error();
-      if (images.includes(u.href)) return setUrlError("That image is already added");
-      if (images.length >= 12) return setUrlError("Up to 12 images");
-      onChange([...images, u.href]);
-      setUrl("");
-      setUrlError("");
-    } catch {
-      setUrlError("Paste a full image link starting with https://");
-    }
-  };
-
-  const move = (i, dir) => {
-    const next = [...images];
-    [next[i], next[i + dir]] = [next[i + dir], next[i]];
-    onChange(next);
-  };
-
-  return (
-    <div>
-      {images.length > 0 ? (
-        <ul className="pe-images">
-          {images.map((src, i) => (
-            <li key={src} className={i === 0 ? "is-main" : ""}>
-              <img src={sized(src, 300)} alt={`Image ${i + 1}`} onError={() => setBroken((b) => ({ ...b, [src]: true }))} onLoad={() => setBroken((b) => ({ ...b, [src]: false }))} />
-              {broken[src] && <span className="pe-images__broken">Can&rsquo;t load this image</span>}
-              {i === 0 && <span className="pe-images__main">Main</span>}
-              <div className="pe-images__tools">
-                <button type="button" aria-label={`Move image ${i + 1} left`} disabled={i === 0} onClick={() => move(i, -1)}>
-                  &larr;
-                </button>
-                <button type="button" aria-label={`Move image ${i + 1} right`} disabled={i === images.length - 1} onClick={() => move(i, 1)}>
-                  &rarr;
-                </button>
-                <button type="button" aria-label={`Remove image ${i + 1}`} onClick={() => onChange(images.filter((x) => x !== src))}>
-                  &times;
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="pe-empty">No images yet. The first image is the one shoppers see in listings.</p>
-      )}
-      <div className="pe-inline">
-        <label htmlFor="ImageUrl" className="visually-hidden">
-          Image URL
-        </label>
-        <input
-          id="ImageUrl"
-          className="pe-input"
-          type="url"
-          placeholder="https://…/image.jpg"
-          value={url}
-          onChange={(e) => {
-            setUrl(e.target.value);
-            setUrlError("");
-          }}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              add();
-            }
-          }}
-        />
-        <button type="button" className="adm-btn" onClick={add} disabled={!url.trim()}>
-          Add image
-        </button>
-      </div>
-      {(urlError || error) && <p className="pe-error">{urlError || error}</p>}
     </div>
   );
 }
@@ -279,6 +199,8 @@ export default function ProductEdit() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [loadError, setLoadError] = useState("");
+  const [uploading, setUploading] = useState(0); // photos still on their way (spec 002 AC-1.6)
+  const [mediaKey, setMediaKey] = useState(0); // bumping it remounts the Media editor, cancelling uploads
   const [toast, showToast] = useToast();
   const topRef = useRef(null);
 
@@ -308,14 +230,14 @@ export default function ProductEdit() {
 
   // Warn before closing the tab with unsaved edits.
   useEffect(() => {
-    if (!dirty) return;
+    if (!dirty && !uploading) return;
     const onUnload = (e) => {
       e.preventDefault();
       e.returnValue = "";
     };
     window.addEventListener("beforeunload", onUnload);
     return () => window.removeEventListener("beforeunload", onUnload);
-  }, [dirty]);
+  }, [dirty, uploading]);
 
   const set = (name, value) => {
     setForm((f) => ({ ...f, [name]: value }));
@@ -346,6 +268,7 @@ export default function ProductEdit() {
   };
 
   const discard = () => {
+    setMediaKey((k) => k + 1);
     setForm(product ? toForm(product) : EMPTY);
     setErrors({});
     setBanner("");
@@ -399,6 +322,7 @@ export default function ProductEdit() {
   const onSale = form.compareAtPrice !== "" && compare > price && price > 0;
   const off = onSale ? Math.round((1 - price / compare) * 100) : 0;
   const live = product && product.status !== "draft";
+  const waitText = `Wait for ${uploading} image${uploading === 1 ? "" : "s"} to finish uploading`;
 
   return (
     <AdminPage
@@ -425,19 +349,19 @@ export default function ProductEdit() {
     >
       <div ref={topRef} />
 
-      {dirty && (
+      {(dirty || uploading > 0) && (
         <div className="pe-savebar" role="region" aria-label="Unsaved changes">
           <span>
             <svg viewBox="0 0 20 20" aria-hidden="true" className="adm-icon">
               <path d="M10 6v5M10 14h.01M10 2.5 18 17H2z" />
             </svg>
-            Unsaved changes
+            {uploading > 0 ? waitText : "Unsaved changes"}
           </span>
           <span className="pe-savebar__btns">
             <button type="button" className="adm-btn" onClick={discard} disabled={saving}>
               Discard
             </button>
-            <button type="button" className="adm-btn adm-btn--primary" onClick={save} disabled={saving}>
+            <button type="button" className="adm-btn adm-btn--primary" onClick={save} disabled={saving || uploading > 0}>
               {saving ? "Saving…" : "Save"}
             </button>
           </span>
@@ -482,7 +406,7 @@ export default function ProductEdit() {
             <h2 id="MediaTitle" className="adm-card__title pe-card__title">
               Media
             </h2>
-            <ImagesEditor images={form.images} onChange={(v) => set("images", v)} error={errors.images} />
+            <ImagesEditor key={`${id}-${mediaKey}`} images={form.images} onChange={(v) => set("images", v)} onPendingChange={setUploading} error={errors.images} />
           </section>
 
           <section className="adm-card pe-card" aria-labelledby="PricingTitle">
@@ -610,7 +534,8 @@ export default function ProductEdit() {
             Delete product
           </button>
         )}
-        <button type="button" className="adm-btn adm-btn--primary" onClick={save} disabled={saving || (!dirty && !isNew)}>
+        {uploading > 0 && <span className="pe-wait" role="status">{waitText}</span>}
+        <button type="button" className="adm-btn adm-btn--primary" onClick={save} disabled={saving || uploading > 0 || (!dirty && !isNew)}>
           {saving ? "Saving…" : isNew ? "Save product" : "Save"}
         </button>
       </div>

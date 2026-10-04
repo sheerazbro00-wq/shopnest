@@ -19,9 +19,12 @@ const formatDate = (d) =>
     .replace(" at ", ", ")
     .replace(/\s?([ap])m$/i, " $1m");
 
-// Product photos come from Shopify's CDN, which resizes on request.
+// Product photos come from Shopify's CDN or Cloudinary (spec 002); both resize on request.
+// Email clients get plain JPG: some can't show WebP/AVIF.
 const thumb = (url, width = 128) => {
   if (!url) return "";
+  if (/^https:\/\/res\.cloudinary\.com\/[^/]+\/image\/upload\//.test(url))
+    return url.replace("/image/upload/", `/image/upload/f_jpg,q_auto,c_limit,w_${width}/`);
   if (!/cdn\.shopify\.com/.test(url)) return url;
   return url + (url.includes("?") ? "&" : "?") + `width=${width}`;
 };

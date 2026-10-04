@@ -4,6 +4,7 @@ const { listOrders, getOrder, updateOrder } = require("../controllers/adminOrder
 const products = require("../controllers/adminProductController");
 const customers = require("../controllers/adminCustomerController");
 const messages = require("../controllers/adminMessageController");
+const { signImageUpload } = require("../controllers/adminUploadController");
 const { protect, admin } = require("../middleware/auth");
 
 const router = express.Router();
@@ -24,6 +25,8 @@ router.post("/products", products.createProduct);
 router.get("/products/:id", products.getProduct);
 router.patch("/products/:id", products.updateProduct);
 router.delete("/products/:id", products.deleteProduct);
+
+router.post("/uploads/sign", signImageUpload);
 
 router.get("/customers", customers.listCustomers);
 router.get("/customers/:key", customers.getCustomer);
