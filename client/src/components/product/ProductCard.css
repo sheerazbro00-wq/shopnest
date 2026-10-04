@@ -149,34 +149,38 @@
   line-height: 1;
 }
 
+/* Small white discs hugging the card edges, so the arrows never sit on
+   top of the product and both sides look the same. */
 .card-nav {
   position: absolute;
   top: 50%;
   z-index: 2;
   display: none;
-  padding: 6px;
-  background: none;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  background: rgba(255, 255, 255, 0.85);
   border: 0;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
   transform: translateY(-50%);
   line-height: 0;
 }
 
 .card-nav--prev {
-  left: 8px;
+  left: 6px;
 }
 
 .card-nav--next {
-  right: 8px;
+  right: 6px;
 }
 
 .card-nav-icon {
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   fill: #000;
-}
-
-.card-nav--prev .card-nav-icon {
-  fill: #8a8a8a;
 }
 
 .quick-add-btn {
@@ -253,7 +257,7 @@
 
 @media (max-width: 768px) {
   .card-nav {
-    display: block;
+    display: flex;
   }
 
   .quick-add-btn {
