@@ -165,8 +165,11 @@ let anyone make our server fetch any URL (an SSRF risk) and slows every save.
  or paste an image link  [https://…            ] [Add]
 ```
 
-- `<input type="file" accept="image/*,.heic,.heif" multiple>` opens gallery/camera/files on
-  phones (AC-1.1, AC-1.2). No `capture` attribute, so the owner can choose gallery *or* camera.
+- `<input type="file" accept="image/*,.heic,.heif" multiple>` opens the picker (AC-1.1, AC-1.2).
+  It must be the broad `image/*`: a list of exact types makes many Android phones open the
+  gallery only, with no camera option (found in live testing).
+- On touch screens a second **Take photo** button uses `capture="environment"`, which always
+  opens the back camera, whatever the phone's picker offers.
 - Each chosen file gets a tile immediately, in the order picked (AC-1.2). Tiles upload **two
   at a time** to stay smooth on mobile data.
 - Before upload: type and size are checked (AC-2.1, AC-2.2); files beyond the 12-image cap are

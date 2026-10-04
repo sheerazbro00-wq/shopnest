@@ -803,3 +803,26 @@
     transition: none;
   }
 }
+
+/* Upload + camera side by side on phones; the camera button only exists where
+   there's a touch screen (a laptop webcam picker isn't useful here). */
+.pe-upload-row {
+  display: flex;
+  gap: 10px;
+}
+
+.pe-upload-row .pe-upload {
+  flex: 1;
+}
+
+.pe-upload--camera {
+  display: none;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .pe-upload--camera {
+    display: grid;
+    flex: 0 0 34%;
+    align-content: center;
+  }
+}

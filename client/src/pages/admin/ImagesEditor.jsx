@@ -29,6 +29,7 @@ export default function ImagesEditor({ images, onChange, onPendingChange, error 
   const [checking, setChecking] = useState(false);
   const [broken, setBroken] = useState({});
   const fileInput = useRef(null);
+  const cameraInput = useRef(null);
   const slip = useRef(null); // { data, at } — reused for every upload within the hour
   const controllers = useRef(new Map()); // upload id → AbortController
 
@@ -180,10 +181,13 @@ export default function ImagesEditor({ images, onChange, onPendingChange, error 
     <div className={`pe-media${dragging ? " is-dragging" : ""}`} {...dropProps}>
       {!uploadsOff && (
         <>
+          {/* A broad "image/*" makes phones offer camera *and* gallery; a list of exact
+              types makes many Android phones jump straight to the gallery. Types are
+              checked after picking instead (AC-2.1). */}
           <input
             ref={fileInput}
             type="file"
-            accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
+            accept="image/*,.heic,.heif"
             multiple
             hidden
             onChange={(e) => {
@@ -191,13 +195,34 @@ export default function ImagesEditor({ images, onChange, onPendingChange, error 
               e.target.value = ""; // picking the same photo again still fires
             }}
           />
-          <button type="button" className="pe-upload" onClick={() => fileInput.current.click()} disabled={full}>
-            <svg viewBox="0 0 24 24" aria-hidden="true" className="pe-upload__icon">
-              <path d="M12 16V4m0 0-4.5 4.5M12 4l4.5 4.5M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" />
-            </svg>
-            <span className="pe-upload__label">{dragging ? "Drop photos to upload" : "Upload images"}</span>
-            <span className="pe-upload__hint">{full ? "12 images is the most a product can have" : "JPG, PNG, WebP or HEIC · up to 10 MB each"}</span>
-          </button>
+          <input
+            ref={cameraInput}
+            type="file"
+            accept="image/*"
+            capture="environment"
+            hidden
+            onChange={(e) => {
+              addFiles(e.target.files);
+              e.target.value = "";
+            }}
+          />
+          <div className="pe-upload-row">
+            <button type="button" className="pe-upload" onClick={() => fileInput.current.click()} disabled={full}>
+              <svg viewBox="0 0 24 24" aria-hidden="true" className="pe-upload__icon">
+                <path d="M12 16V4m0 0-4.5 4.5M12 4l4.5 4.5M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" />
+              </svg>
+              <span className="pe-upload__label">{dragging ? "Drop photos to upload" : "Upload images"}</span>
+              <span className="pe-upload__hint">{full ? "12 images is the most a product can have" : "JPG, PNG, WebP or HEIC · up to 10 MB each"}</span>
+            </button>
+            {/* Phones only: always opens the camera, whatever the picker above offers. */}
+            <button type="button" className="pe-upload pe-upload--camera" onClick={() => cameraInput.current.click()} disabled={full}>
+              <svg viewBox="0 0 24 24" aria-hidden="true" className="pe-upload__icon">
+                <path d="M4 8h3l1.5-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z" />
+                <circle cx="12" cy="13" r="3.5" />
+              </svg>
+              <span className="pe-upload__label">Take photo</span>
+            </button>
+          </div>
           {notice && (
             <p className="pe-error" role="alert">
               {notice}
