@@ -3,7 +3,8 @@ const { FONT, escapeHtml, formatDate, button, heading, layout, textFooter } = re
 // Spec 006 US-1: a new Contact-page message, for the store owner. Everything the visitor
 // typed is escaped and shown as text; "Reply" goes to the visitor (set by the caller).
 module.exports = function contactAlert({ message, adminUrl }) {
-  const subject = `New message from ${String(message.name).replace(/s+/g, " ").slice(0, 60)}`; // one line, whatever was typed
+  // One line, whatever was typed: line breaks in a subject could smuggle in extra headers.
+  const subject = `New message from ${String(message.name).replace(/\s+/g, " ").trim().slice(0, 60)}`;
 
   const detail = (label, value) => `
     <tr>
