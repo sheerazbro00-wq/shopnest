@@ -33,6 +33,6 @@
 
 ## Phase 5 — Go live
 
-- [ ] **T5.1** Commit, push, deploys done.
+- [x] **T5.1** Commit, push, deploys done.
 - [ ] **T5.2** Owner's phone: a shirt, a pair of trousers and shoes on the live store. [DoD]
 - [ ] **T5.3** Mark spec and tasks Done.

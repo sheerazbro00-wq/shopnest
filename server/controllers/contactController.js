@@ -1,5 +1,6 @@
 const ContactMessage = require("../models/ContactMessage");
 const { clean, isEmail } = require("../utils/validation");
+const { notifyContactMessage } = require("../services/contactNotifications");
 
 const MIN_MESSAGE = 10;
 
@@ -24,7 +25,8 @@ const sendMessage = async (req, res) => {
     return res.status(400).json({ message: "Please check the highlighted fields", errors });
   }
 
-  await ContactMessage.create({ name, email, message, user: req.user?._id });
+  const saved = await ContactMessage.create({ name, email, message, user: req.user?._id });
+  await notifyContactMessage(saved); // owner alert + "we've received it" (spec 006); never throws
   res.status(201).json({ message: "Thanks for contacting us." });
 };
 

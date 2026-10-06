@@ -16,7 +16,8 @@ const mask = (email) => {
 // Demo data and tests use reserved .test domains; those never get real mail (R-6).
 const isTestAddress = (email) => /\.test$/i.test(String(email).split("@")[1] || "");
 
-async function sendEmail({ to, subject, html, text, tag = "email" }) {
+// replyTo: who "Reply" goes to — the store by default; the visitor for contact alerts (spec 006).
+async function sendEmail({ to, subject, html, text, tag = "email", replyTo = from }) {
   const log = (result) => console.log(`[email] ${tag} -> ${mask(to)}: ${result}`);
 
   if (!emailEnabled) return { sent: false, reason: "disabled" };
@@ -31,7 +32,7 @@ async function sendEmail({ to, subject, html, text, tag = "email" }) {
       headers: { "api-key": brevoApiKey, "content-type": "application/json", accept: "application/json" },
       body: JSON.stringify({
         sender: from,
-        replyTo: from,
+        replyTo,
         to: [{ email: to }],
         subject,
         htmlContent: html,
