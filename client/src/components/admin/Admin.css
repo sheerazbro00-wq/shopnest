@@ -849,3 +849,11 @@
     animation: none;
   }
 }
+
+/* Several badges in one cell (e.g. "Paid" + "PayPal (test)"). A span, not the
+   td itself: a flex td stops behaving like a table cell. */
+.adm-badges {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}

@@ -48,7 +48,7 @@ const getDashboard = async (req, res) => {
     ]),
     Order.aggregate([{ $group: { _id: "$status", count: { $sum: 1 } } }]),
     Order.find({}).sort({ createdAt: -1, orderNumber: -1 }).limit(6)
-      .select("orderNumber createdAt shippingAddress.firstName shippingAddress.lastName email paymentMethod isPaid status totalPrice orderItems.qty")
+      .select("orderNumber createdAt shippingAddress.firstName shippingAddress.lastName email paymentMethod paypal.mode isPaid status totalPrice orderItems.qty")
       .lean(),
     Order.aggregate([
       { $match: { ...SALE, createdAt: { $gte: from } } },
@@ -97,6 +97,7 @@ const getDashboard = async (req, res) => {
       customer: `${o.shippingAddress?.firstName || ""} ${o.shippingAddress?.lastName || ""}`.trim() || o.email,
       items: o.orderItems.reduce((n, i) => n + i.qty, 0),
       paymentMethod: o.paymentMethod,
+      paypalMode: o.paypal?.mode,
       isPaid: o.isPaid,
       status: o.status,
       totalPrice: o.totalPrice,

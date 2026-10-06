@@ -35,8 +35,16 @@ const orderSchema = new mongoose.Schema(
       postalCode: String,
       country: { type: String, default: "Pakistan" },
     },
-    paymentMethod: { type: String, enum: ["COD", "Card"], required: true },
+    paymentMethod: { type: String, enum: ["COD", "Card", "PayPal"], required: true },
     stripeSessionId: String,
+    // PayPal charges in USD (spec 004 R-1): the exact amount and rate are fixed at checkout.
+    paypal: {
+      mode: { type: String, enum: ["simulated", "sandbox", "live"] },
+      usd: String, // "21.25" — the exact value sent to PayPal
+      rate: Number, // Rs per USD used
+      orderId: String, // PayPal's order id (SIM-… in simulated mode)
+      captureId: String, // PayPal's transaction id
+    },
     paymentResult: { id: String, status: String, email: String },
     itemsPrice: { type: Number, required: true },
     shippingPrice: { type: Number, required: true },

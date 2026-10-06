@@ -13,11 +13,17 @@ const ownerAlert = require("./email/templates/ownerAlert");
 const PAYMENT = {
   COD: { line: (o) => `Pay ${rupees(o.totalPrice)} in cash on delivery`, label: "Cash on Delivery" },
   Card: { line: () => "Paid by card", label: "Paid by card" },
+  // Charged in USD (spec 004); a simulated payment is flagged TEST to the owner (AC-4.2).
+  PayPal: {
+    line: (o) => `Paid with PayPal — $${o.paypal?.usd} (${rupees(o.totalPrice)})`,
+    label: (o) => (o.paypal?.mode === "simulated" ? "PayPal TEST" : "PayPal"),
+  },
 };
 
 const paymentOf = (order) => {
   const p = PAYMENT[order.paymentMethod];
-  return p ? { line: p.line(order), label: p.label } : { line: `Payment: ${order.paymentMethod}`, label: order.paymentMethod };
+  if (!p) return { line: `Payment: ${order.paymentMethod}`, label: order.paymentMethod };
+  return { line: p.line(order), label: typeof p.label === "function" ? p.label(order) : p.label };
 };
 
 // "Confirmed" (spec §2): placed and not waiting for, or lost, its payment.

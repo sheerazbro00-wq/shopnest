@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { STATUS_BADGE, orderDate, paymentBadge, rupees } from "./format";
+import { STATUS_BADGE, orderDate, paymentBadge, paymentLabel, rupees } from "./format";
 
 export const Badge = ({ label, tone }) => <span className={`adm-badge adm-badge--${tone}`}>{label}</span>;
 
@@ -45,7 +45,11 @@ export default function OrdersTable({ orders, search = "" }) {
                 {o.city && <span className="adm-muted adm-hide-sm"> · {o.city}</span>}
               </td>
               <td data-slot="pay">
-                <Badge {...paymentBadge(o)} />
+                <span className="adm-badges">
+                  <Badge {...paymentBadge(o)} />
+                  {/* PayPal is new and test payments must stand out (spec 004 AC-4.2). */}
+                  {o.paymentMethod === "PayPal" && <Badge label={paymentLabel(o, { admin: true })} tone="info" />}
+                </span>
               </td>
               <td data-slot="ful">
                 <StatusBadge status={o.status} />

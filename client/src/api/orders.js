@@ -14,6 +14,9 @@ export const fetchCheckoutConfig = () => {
 
 export const placeOrder = (payload) => api.post("/orders/checkout", payload).then((res) => res.data);
 
+// "Pay now" on the test-mode PayPal page (spec 004, simulated mode only).
+export const simulatePayPal = (id, token) => api.post(`/orders/${id}/paypal/simulate`, { token }).then((res) => res.data);
+
 export const fetchOrder = (id, token) => api.get(`/orders/${id}`, { params: { token } }).then((res) => res.data);
 
 // Axios error -> the server's message, or a generic fallback.

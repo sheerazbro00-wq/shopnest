@@ -1,5 +1,5 @@
 const express = require("express");
-const { getCheckoutConfig, checkout, getOrder, getMyOrders } = require("../controllers/orderController");
+const { getCheckoutConfig, checkout, getOrder, getMyOrders, simulatePayPal } = require("../controllers/orderController");
 const { protect, optionalAuth } = require("../middleware/auth");
 
 const router = express.Router();
@@ -10,5 +10,6 @@ router.get("/config", getCheckoutConfig);
 router.post("/checkout", optionalAuth, checkout);
 router.get("/mine", protect, getMyOrders);
 router.get("/:id", optionalAuth, getOrder);
+router.post("/:id/paypal/simulate", simulatePayPal); // test-mode approval page (spec 004)
 
 module.exports = router;

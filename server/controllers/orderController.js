@@ -7,6 +7,9 @@ const Counter = require("../models/Counter");
 const { CURRENCY, FREE_SHIPPING_MIN, SHIPPING_FEE, MAX_QTY, MAX_LINES } = require("../config/shop");
 const { clientUrl } = require("../config/client");
 const { notifyOrderConfirmed } = require("../services/orderNotifications");
+const paypalConfig = require("../config/paypal");
+const paypal = require("../services/payments/paypal");
+const { markPaid } = require("../services/payments/markPaid");
 
 // Card payments switch on only when a real-looking key is configured, so the
 // store still works (Cash on Delivery) with the placeholder key.
@@ -106,20 +109,54 @@ const publicOrder = (order) => {
   return o;
 };
 
+// Paid online at checkout (card, PayPal): unpaid ones are abandoned checkouts, not orders.
+const ONLINE_METHODS = ["Card", "PayPal"];
+const METHODS = ["COD", ...ONLINE_METHODS];
+
 // GET /api/orders/config
-const getCheckoutConfig = (req, res) => {
-  res.json({ cardEnabled, freeShippingMin: FREE_SHIPPING_MIN, shippingFee: SHIPPING_FEE, maxQty: MAX_QTY });
+// PayPal reports only enabled + rate, never its mode: checkout looks the same in every mode (spec 004 AC-1.5).
+const getCheckoutConfig = async (req, res) => {
+  res.json({
+    cardEnabled,
+    paypal: { enabled: await paypalConfig.isReady(), rate: paypalConfig.rate },
+    freeShippingMin: FREE_SHIPPING_MIN,
+    shippingFee: SHIPPING_FEE,
+    maxQty: MAX_QTY,
+  });
 };
+
+// Returning from real PayPal: take the money and check it (spec 004 AC-2.3, R-1).
+// Simulated orders are only paid through simulatePayPal (R-3).
+async function confirmPayPal(order) {
+  const p = order.paypal || {};
+  if (order.isPaid || order.status !== "Awaiting payment" || !p.orderId) return order;
+  if (p.mode === "simulated" || p.mode !== paypalConfig.mode || !(await paypalConfig.isReady())) return order;
+  try {
+    const result = await paypal.confirmPayment(order);
+    if (!result.paid) return order;
+    const { order: paid } = await markPaid(order._id, {
+      by: "PayPal",
+      paymentResult: { id: result.captureId, status: "COMPLETED", email: result.payerEmail },
+      set: { "paypal.captureId": result.captureId },
+    });
+    return paid;
+  } catch (err) {
+    console.error(`[paypal] confirm failed for order #${order.orderNumber}: ${err.message}`);
+    return order;
+  }
+}
 
 // POST /api/orders/checkout  (guest or signed in)
 const checkout = async (req, res) => {
-  const paymentMethod = req.body.paymentMethod === "Card" ? "Card" : "COD";
+  const paymentMethod = METHODS.includes(req.body.paymentMethod) ? req.body.paymentMethod : "COD";
   if (paymentMethod === "Card" && !cardEnabled) throw httpError(400, "Card payments are not available right now");
+  if (paymentMethod === "PayPal" && !(await paypalConfig.isReady())) throw httpError(400, "PayPal is not available right now");
 
   const customer = readCustomer(req.body);
   const orderItems = await priceItems(req.body.items);
   const itemsPrice = orderItems.reduce((sum, i) => sum + i.price * i.qty, 0);
   const shippingPrice = shippingFor(itemsPrice);
+  const totalPrice = itemsPrice + shippingPrice;
 
   const order = await Order.create({
     ...customer,
@@ -129,15 +166,34 @@ const checkout = async (req, res) => {
     paymentMethod,
     itemsPrice,
     shippingPrice,
-    totalPrice: itemsPrice + shippingPrice,
-    status: paymentMethod === "Card" ? "Awaiting payment" : "Pending",
+    totalPrice,
+    status: paymentMethod === "COD" ? "Pending" : "Awaiting payment",
+    // The dollar amount is fixed here, on the server, and is what PayPal must confirm (R-1).
+    ...(paymentMethod === "PayPal" && {
+      paypal: { mode: paypalConfig.mode, rate: paypalConfig.rate, usd: paypal.toUsd(totalPrice) },
+    }),
   });
   const { accessToken } = await Order.findById(order._id).select("+accessToken").lean();
   const result = { orderId: order._id, token: accessToken };
 
-  // Confirmed orders (COD) get their emails now; card orders wait for payment.
+  // Confirmed orders (COD) get their emails now; online payments wait to be paid.
   await notifyOrderConfirmed(order);
   if (paymentMethod === "COD") return res.status(201).json(result);
+
+  if (paymentMethod === "PayPal") {
+    try {
+      const { id, approveUrl } = await paypal.createPayment(order, accessToken);
+      order.paypal.orderId = id;
+      await order.save();
+      return res.status(201).json({ ...result, url: approveUrl });
+    } catch (err) {
+      console.error(`[paypal] create failed for order #${order.orderNumber}: ${err.message}`);
+      order.status = "Cancelled";
+      order.$locals.actor = "System";
+      await order.save();
+      throw httpError(502, "Could not start PayPal payment. Please try again or choose another payment method.");
+    }
+  }
 
   // Card: hand off to Stripe's hosted Checkout page (card data never touches our server).
   const client = clientUrl;
@@ -201,7 +257,30 @@ const getOrder = async (req, res) => {
     const session = await stripe.checkout.sessions.retrieve(order.stripeSessionId);
     order = await applyStripeSession(order, session);
   }
+  if (order.paymentMethod === "PayPal") order = await confirmPayPal(order);
   res.json(publicOrder(order));
+};
+
+// POST /api/orders/:id/paypal/simulate  { token }
+// The "Pay now" button of the test approval page. Works only in simulated mode, for an
+// order placed in simulated mode, with that order's link token (spec 004 R-3).
+const simulatePayPal = async (req, res) => {
+  const notFound = () => httpError(404, "Order not found");
+  if (paypalConfig.mode !== "simulated" || !mongoose.isValidObjectId(req.params.id)) throw notFound();
+  const order = await Order.findById(req.params.id).select("+accessToken");
+  if (!order || order.paymentMethod !== "PayPal" || order.paypal?.mode !== "simulated") throw notFound();
+  const token = String(req.body?.token || "");
+  const tokenOk = token.length === order.accessToken.length && crypto.timingSafeEqual(Buffer.from(token), Buffer.from(order.accessToken));
+  if (!tokenOk) throw notFound();
+  if (order.isPaid) return res.json({ paid: true });
+  if (order.status !== "Awaiting payment") throw httpError(409, "This order can no longer be paid");
+
+  await markPaid(order._id, {
+    by: "PayPal (test)",
+    paymentResult: { id: order.paypal.orderId, status: "COMPLETED (test)" },
+    set: { "paypal.captureId": order.paypal.orderId },
+  });
+  res.json({ paid: true });
 };
 
 // POST /api/orders/webhook — Stripe calls this; body must be the raw bytes for signature checks.
@@ -225,9 +304,9 @@ const stripeWebhook = async (req, res) => {
 };
 
 // GET /api/orders/mine
-// Card checkouts that were never paid are abandoned carts, not orders — hide them.
+// Online checkouts that were never paid are abandoned carts, not orders — hide them.
 const getMyOrders = async (req, res) => {
-  const orders = await Order.find({ user: req.user._id, $nor: [{ paymentMethod: "Card", isPaid: false }] })
+  const orders = await Order.find({ user: req.user._id, $nor: [{ paymentMethod: { $in: ONLINE_METHODS }, isPaid: false }] })
     .select("-stripeSessionId -paymentResult")
     .sort({ createdAt: -1 })
     .limit(100);
@@ -240,5 +319,6 @@ module.exports = {
   checkout,
   getOrder,
   stripeWebhook,
+  simulatePayPal,
   getMyOrders,
 };

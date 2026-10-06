@@ -21,6 +21,7 @@ const PAYMENTS = [
   { value: "unpaid", label: "Payment pending" },
   { value: "cod", label: "Cash on Delivery" },
   { value: "card", label: "Card" },
+  { value: "paypal", label: "PayPal" },
 ];
 
 const SORTS = [

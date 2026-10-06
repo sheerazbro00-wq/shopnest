@@ -5,6 +5,7 @@ import { useCart } from "../context/CartContext";
 import CheckoutLayout from "../components/checkout/CheckoutLayout";
 import OrderSummary from "../components/checkout/OrderSummary";
 import { money } from "../components/checkout/money";
+import { isOnline, usdOf } from "../utils/payment";
 
 export default function ThankYou() {
   const { id } = useParams();
@@ -21,7 +22,7 @@ export default function ThankYou() {
       .catch((err) => setError(errorMessage(err, "Order not found")));
   }, [id, token]);
 
-  // Card orders keep the cart until Stripe confirms payment.
+  // Card and PayPal orders keep the cart until the payment is confirmed.
   useEffect(() => {
     if (order && (order.isPaid || order.paymentMethod === "COD")) clearCart();
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -49,7 +50,8 @@ export default function ThankYou() {
   }
 
   const a = order.shippingAddress;
-  const unpaidCard = order.paymentMethod === "Card" && !order.isPaid;
+  const unpaidOnline = isOnline(order) && !order.isPaid;
+  const viaPayPal = order.paymentMethod === "PayPal";
   const lines = order.orderItems.map((i, n) => ({
     key: `${i.product}_${i.size}_${n}`,
     image: i.image,
@@ -77,11 +79,11 @@ export default function ThankYou() {
         </div>
 
         <div className="co-box">
-          {unpaidCard ? (
+          {unpaidOnline ? (
             <>
               <h3>Payment not completed</h3>
               <p>
-                We haven&apos;t received your card payment yet. Your cart is still saved —{" "}
+                We haven&apos;t received your {viaPayPal ? "PayPal" : "card"} payment yet. Your cart is still saved —{" "}
                 <Link to="/checkout" className="co-link">
                   return to checkout
                 </Link>{" "}
@@ -110,9 +112,17 @@ export default function ThankYou() {
             <div>
               <h4>Payment method</h4>
               <p>
-                {order.paymentMethod === "COD" ? "Cash on Delivery (COD)" : order.isPaid ? "Paid by card" : "Card (unpaid)"}
+                {order.paymentMethod === "COD"
+                  ? "Cash on Delivery (COD)"
+                  : viaPayPal
+                    ? order.isPaid
+                      ? "Paid with PayPal"
+                      : "PayPal (unpaid)"
+                    : order.isPaid
+                      ? "Paid by card"
+                      : "Card (unpaid)"}
                 {" · "}
-                {money(order.totalPrice)}
+                {viaPayPal ? `${usdOf(order)} (${money(order.totalPrice)})` : money(order.totalPrice)}
               </p>
             </div>
             <div>

@@ -36,6 +36,7 @@ function paymentFilter(payment) {
   if (payment === "unpaid") return { isPaid: false };
   if (payment === "cod") return { paymentMethod: "COD" };
   if (payment === "card") return { paymentMethod: "Card" };
+  if (payment === "paypal") return { paymentMethod: "PayPal" };
   return {};
 }
 
@@ -52,7 +53,7 @@ const listOrders = async (req, res) => {
       .sort(sort)
       .skip((page - 1) * PAGE_SIZE)
       .limit(PAGE_SIZE)
-      .select("orderNumber createdAt email shippingAddress.firstName shippingAddress.lastName shippingAddress.city paymentMethod isPaid status totalPrice orderItems.qty")
+      .select("orderNumber createdAt email shippingAddress.firstName shippingAddress.lastName shippingAddress.city paymentMethod paypal.mode isPaid status totalPrice orderItems.qty")
       .lean(),
     Order.countDocuments(filter),
     // Tab counts reflect the search + payment filters, but not the status tab itself.
@@ -68,6 +69,7 @@ const listOrders = async (req, res) => {
       customer: `${o.shippingAddress?.firstName || ""} ${o.shippingAddress?.lastName || ""}`.trim() || o.email,
       city: o.shippingAddress?.city,
       paymentMethod: o.paymentMethod,
+      paypalMode: o.paypal?.mode,
       isPaid: o.isPaid,
       status: o.status,
       totalPrice: o.totalPrice,

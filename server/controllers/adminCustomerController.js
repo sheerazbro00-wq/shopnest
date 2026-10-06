@@ -224,7 +224,7 @@ const getCustomer = async (req, res) => {
     Order.find(byCustomer)
       .sort({ createdAt: -1 })
       .limit(10)
-      .select("orderNumber createdAt paymentMethod isPaid status totalPrice orderItems.qty shippingAddress.city")
+      .select("orderNumber createdAt paymentMethod paypal.mode isPaid status totalPrice orderItems.qty shippingAddress.city")
       .lean(),
     Order.findOne(byCustomer).sort({ createdAt: -1 }).select("-accessToken -stripeSessionId -history -adminNote").lean(),
     ContactMessage.find({ email }).sort({ createdAt: -1 }).limit(5).select("message status createdAt").lean(),
@@ -260,6 +260,7 @@ const getCustomer = async (req, res) => {
       status: lastOrder.status,
       isPaid: lastOrder.isPaid,
       paymentMethod: lastOrder.paymentMethod,
+      paypalMode: lastOrder.paypal?.mode,
       totalPrice: lastOrder.totalPrice,
       orderItems: lastOrder.orderItems.map(({ name, color, size, qty, price, image, handle }) => ({ name, color, size, qty, price, image, handle })),
     },
@@ -269,6 +270,7 @@ const getCustomer = async (req, res) => {
       createdAt: o.createdAt,
       city: o.shippingAddress?.city || "",
       paymentMethod: o.paymentMethod,
+      paypalMode: o.paypal?.mode,
       isPaid: o.isPaid,
       status: o.status,
       totalPrice: o.totalPrice,

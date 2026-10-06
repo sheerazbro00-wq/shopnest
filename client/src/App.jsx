@@ -19,6 +19,8 @@ import PrivacyPolicy from "./pages/content/PrivacyPolicy";
 import SizeGuide from "./pages/content/SizeGuide";
 import Checkout from "./pages/Checkout";
 import ThankYou from "./pages/ThankYou";
+import PayPalTest from "./pages/PayPalTest";
+import PayPalReturn from "./pages/PayPalReturn";
 import Login from "./pages/account/Login";
 import Register from "./pages/account/Register";
 import ForgotPassword from "./pages/account/ForgotPassword";
@@ -96,6 +98,8 @@ function Shell() {
       <Routes>
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/checkout/thank-you/:id" element={<ThankYou />} />
+        <Route path="/checkout/paypal-test/:id" element={<PayPalTest />} />
+        <Route path="/checkout/paypal-return/:id" element={<PayPalReturn />} />
         <Route path="*" element={<ComingSoon />} />
       </Routes>
     );

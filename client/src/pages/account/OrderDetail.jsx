@@ -8,6 +8,7 @@ import AccountLayout from "../../components/account/AccountLayout";
 import { orderStatus, shortDate } from "../../components/account/orderStatus";
 import OrderSummary from "../../components/checkout/OrderSummary";
 import { money } from "../../components/checkout/money";
+import { paymentLabel, usdOf } from "../../utils/payment";
 
 const STEPS = ["Confirmed", "On its way", "Delivered"];
 
@@ -149,11 +150,11 @@ export default function OrderDetail() {
           <section className="acc-card acc-info">
             <h3>Payment</h3>
             <p>
-              {order.paymentMethod === "COD" ? "Cash on Delivery (COD)" : "Card"}
+              {order.paymentMethod === "COD" ? "Cash on Delivery (COD)" : paymentLabel(order)}
               {" · "}
               {order.isPaid ? "Paid" : order.paymentMethod === "COD" ? "Pay on delivery" : "Pending"}
             </p>
-            <p className="co-muted">{money(order.totalPrice)}</p>
+            <p className="co-muted">{order.paymentMethod === "PayPal" ? `${usdOf(order)} (${money(order.totalPrice)})` : money(order.totalPrice)}</p>
           </section>
           <section className="acc-card acc-info">
             <h3>Shipping method</h3>

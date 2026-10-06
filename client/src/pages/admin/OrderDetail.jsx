@@ -6,7 +6,7 @@ import { AdminPage } from "../../components/admin/AdminLayout";
 import ConfirmDialog from "../../components/admin/ConfirmDialog";
 import Toast, { useToast } from "../../components/admin/Toast";
 import { Badge, StatusBadge } from "../../components/admin/OrdersTable";
-import { paymentBadge, rupees } from "../../components/admin/format";
+import { paymentBadge, paymentLabel, rupees } from "../../components/admin/format";
 import { sized } from "../../utils/format";
 import "./OrderDetail.css";
 
@@ -201,7 +201,7 @@ export default function OrderDetail() {
           <StatusBadge status={order.status} />
         </>
       }
-      subtitle={`${fullDate(order.createdAt)} · ${order.paymentMethod === "COD" ? "Cash on Delivery" : "Card"}`}
+      subtitle={`${fullDate(order.createdAt)} · ${paymentLabel(order, { admin: true })}`}
       actions={pager}
     >
 
@@ -280,11 +280,18 @@ export default function OrderDetail() {
                 <dd>{rupees(order.totalPrice)}</dd>
               </div>
               <div className="od-sums__paid">
-                <dt>{order.isPaid ? "Paid by customer" : order.status === "Cancelled" ? "Not collected" : order.paymentMethod === "COD" ? "To collect on delivery" : "Awaiting card payment"}</dt>
+                <dt>{order.isPaid ? "Paid by customer" : order.status === "Cancelled" ? "Not collected" : order.paymentMethod === "COD" ? "To collect on delivery" : order.paymentMethod === "PayPal" ? "Awaiting PayPal payment" : "Awaiting card payment"}</dt>
                 <dd>{rupees(order.isPaid ? order.totalPrice : order.status === "Cancelled" ? 0 : order.totalPrice)}</dd>
               </div>
             </dl>
-            {order.paymentResult?.id && <p className="od-small adm-muted">Stripe payment: {order.paymentResult.id}</p>}
+            {order.paymentMethod === "PayPal" ? (
+              <p className="od-small adm-muted">
+                {paymentLabel(order, { admin: true })} · ${order.paypal?.usd} at Rs {order.paypal?.rate}/USD
+                {order.paypal?.captureId && <> · transaction {order.paypal.captureId}</>}
+              </p>
+            ) : (
+              order.paymentResult?.id && <p className="od-small adm-muted">Stripe payment: {order.paymentResult.id}</p>
+            )}
           </section>
 
           <section className="adm-card od-card" aria-labelledby="TimelineTitle">
@@ -363,6 +370,11 @@ export default function OrderDetail() {
         onClose={() => setConfirmCancel(false)}
       >
         <p>The order will be marked as cancelled and can&rsquo;t be reopened.</p>
+        {order.paymentMethod === "PayPal" && order.isPaid && order.paypal?.mode !== "simulated" && (
+          <p>
+            <strong>This order was paid with PayPal.</strong> Cancelling here doesn&rsquo;t move money — refund ${order.paypal?.usd} from your PayPal account.
+          </p>
+        )}
         {order.paymentMethod === "Card" && order.isPaid && (
           <p>
             <strong>This order was paid by card.</strong> Cancelling here doesn&rsquo;t move money — refund {rupees(order.totalPrice)} from your Stripe dashboard.

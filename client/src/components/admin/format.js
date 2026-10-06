@@ -41,6 +41,8 @@ export const paymentBadge = (order) =>
       ? { label: "Voided", tone: "neutral" }
       : { label: order.paymentMethod === "COD" ? "Payment pending (COD)" : "Payment pending", tone: "warning" };
 
+export { paymentLabel } from "../../utils/payment";
+
 // Inbox-style: "3:12 pm" today, "Yesterday", "Sep 21", or "Sep 21, 2025" for older years.
 export function shortDate(value) {
   const d = new Date(value);

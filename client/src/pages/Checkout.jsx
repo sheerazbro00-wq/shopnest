@@ -10,8 +10,28 @@ import OrderSummary from "../components/checkout/OrderSummary";
 import Field from "../components/checkout/Field";
 import { MastercardIcon, VisaIcon } from "../components/checkout/PaymentIcons";
 import { money } from "../components/checkout/money";
+import PayPalButton from "../components/checkout/PayPalButton";
+import { toUsd } from "../utils/payment";
 
 const SAVED_KEY = "shopnest_checkout_info";
+// The form as it was when the shopper left for Stripe/PayPal; restored if they cancel
+// there (spec 004 AC-3.1). Session-only, so it never outlives the tab.
+const DRAFT_KEY = "shopnest_checkout_draft";
+
+const CANCEL_MESSAGES = {
+  paypal: "PayPal payment was cancelled. Your cart is still here — try again or choose another payment method.",
+  card: "Card payment was cancelled. Your cart is still here — try again or choose Cash on Delivery.",
+};
+
+function takeDraft() {
+  try {
+    const draft = JSON.parse(sessionStorage.getItem(DRAFT_KEY));
+    sessionStorage.removeItem(DRAFT_KEY);
+    return draft || null;
+  } catch {
+    return null;
+  }
+}
 const ADDRESS_FIELDS = ["firstName", "lastName", "address", "apartment", "city", "postalCode", "phone"];
 
 function loadSaved() {
@@ -40,8 +60,11 @@ export default function Checkout() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [params] = useSearchParams();
+  const canceled = params.get("canceled");
   const [config, setConfig] = useState(null);
+  const restored = useRef(canceled ? takeDraft() : null);
   const [form, setForm] = useState(() => {
+    if (restored.current) return restored.current;
     const saved = loadSaved();
     return {
       email: user?.email || saved.email || "",
@@ -59,9 +82,7 @@ export default function Checkout() {
     };
   });
   const [errors, setErrors] = useState({});
-  const [formError, setFormError] = useState(
-    params.get("canceled") ? "Card payment was cancelled. Your cart is still here — try again or choose Cash on Delivery." : ""
-  );
+  const [formError, setFormError] = useState(canceled ? CANCEL_MESSAGES[canceled] || CANCEL_MESSAGES.card : "");
   const [submitting, setSubmitting] = useState(false);
   const placed = useRef(false);
   const fieldRefs = useRef({});
@@ -71,9 +92,12 @@ export default function Checkout() {
     fetchCheckoutConfig()
       .then((c) => {
         setConfig(c);
-        if (c.cardEnabled) setForm((f) => ({ ...f, paymentMethod: "Card" }));
+        // Card is the default — unless the shopper is back from a cancelled payment
+        // and already chose a method.
+        if (c.cardEnabled && !restored.current) setForm((f) => ({ ...f, paymentMethod: "Card" }));
+        if (!c.paypal?.enabled) setForm((f) => (f.paymentMethod === "PayPal" ? { ...f, paymentMethod: c.cardEnabled ? "Card" : "COD" } : f));
       })
-      .catch(() => setConfig({ cardEnabled: false, freeShippingMin: 2500, shippingFee: 250 }));
+      .catch(() => setConfig({ cardEnabled: false, paypal: { enabled: false }, freeShippingMin: 2500, shippingFee: 250 }));
   }, []);
 
   // Signed-in customers: fill the delivery form from their default saved address
@@ -147,7 +171,12 @@ export default function Checkout() {
       });
 
       if (result.url) {
-        // Card: the cart is cleared on the thank-you page once Stripe confirms payment.
+        // Card / PayPal: the cart is cleared on the thank-you page once payment is confirmed.
+        try {
+          sessionStorage.setItem(DRAFT_KEY, JSON.stringify(form));
+        } catch {
+          /* private mode: a cancel just shows an empty form */
+        }
         window.location.assign(result.url);
         return;
       }
@@ -171,6 +200,7 @@ export default function Checkout() {
 
   const summary = <OrderSummary lines={lines} itemsPrice={subtotal} shippingPrice={shippingPrice} total={total} />;
   const cardEnabled = Boolean(config?.cardEnabled);
+  const paypalEnabled = Boolean(config?.paypal?.enabled);
 
   return (
     <CheckoutLayout summary={summary} total={total}>
@@ -263,6 +293,32 @@ export default function Checkout() {
               <div className="co-option__panel co-option__panel--muted">Card payments are currently unavailable.</div>
             )}
 
+            {paypalEnabled && (
+              <label className={`co-option${form.paymentMethod === "PayPal" ? " is-selected" : ""}`}>
+                <input
+                  type="radio"
+                  name="paymentMethod"
+                  value="PayPal"
+                  checked={form.paymentMethod === "PayPal"}
+                  onChange={() => set("paymentMethod", "PayPal")}
+                />
+                <span className="co-radio" />
+                <span className="co-option__label">PayPal</span>
+                <span className="co-option__icons">
+                  <span className="co-paypal-mark" aria-hidden="true">
+                    <span className="co-paypal-btn__pay">Pay</span>
+                    <span className="co-paypal-btn__pal">Pal</span>
+                  </span>
+                </span>
+              </label>
+            )}
+            {paypalEnabled && form.paymentMethod === "PayPal" && (
+              <div className="co-option__panel">
+                You&apos;ll pay <strong>${toUsd(total, config.paypal.rate)}</strong> ({money(total)}) with PayPal. After clicking
+                the PayPal button, you&apos;ll be taken to PayPal to complete your purchase.
+              </div>
+            )}
+
             <label className={`co-option${form.paymentMethod === "COD" ? " is-selected" : ""}`}>
               <input
                 type="radio"
@@ -285,9 +341,13 @@ export default function Checkout() {
           {summary}
         </section>
 
-        <button type="submit" className="co-submit" disabled={submitting || !config}>
-          {submitting ? <span className="co-spinner" aria-label="Processing" /> : form.paymentMethod === "Card" ? "Pay now" : "Complete order"}
-        </button>
+        {form.paymentMethod === "PayPal" && paypalEnabled ? (
+          <PayPalButton submitting={submitting} disabled={submitting || !config} />
+        ) : (
+          <button type="submit" className="co-submit" disabled={submitting || !config}>
+            {submitting ? <span className="co-spinner" aria-label="Processing" /> : form.paymentMethod === "Card" ? "Pay now" : "Complete order"}
+          </button>
+        )}
       </form>
     </CheckoutLayout>
   );
