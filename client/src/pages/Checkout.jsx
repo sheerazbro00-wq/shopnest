@@ -152,13 +152,17 @@ export default function Checkout() {
     setSubmitting(true);
     setFormError("");
     try {
-      if (form.saveInfo) {
-        localStorage.setItem(
-          SAVED_KEY,
-          JSON.stringify(Object.fromEntries(["email", ...ADDRESS_FIELDS].map((k) => [k, form[k]])))
-        );
-      } else {
-        localStorage.removeItem(SAVED_KEY);
+      try {
+        if (form.saveInfo) {
+          localStorage.setItem(
+            SAVED_KEY,
+            JSON.stringify(Object.fromEntries(["email", ...ADDRESS_FIELDS].map((k) => [k, form[k]])))
+          );
+        } else {
+          localStorage.removeItem(SAVED_KEY);
+        }
+      } catch {
+        /* storage blocked: the order still goes through, the details just aren't saved */
       }
 
       const result = await placeOrder({

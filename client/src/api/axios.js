@@ -5,10 +5,13 @@ const api = axios.create({
 });
 
 api.interceptors.request.use((config) => {
-  const stored = localStorage.getItem("shopnest_user");
-  if (stored) {
-    const { token } = JSON.parse(stored);
+  // Storage can be blocked (e.g. cookies disabled): then the request simply goes
+  // without a token instead of failing — guests can still browse and buy.
+  try {
+    const { token } = JSON.parse(localStorage.getItem("shopnest_user")) || {};
     if (token) config.headers.Authorization = `Bearer ${token}`;
+  } catch {
+    /* no stored session */
   }
   return config;
 });

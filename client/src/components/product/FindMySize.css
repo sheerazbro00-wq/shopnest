@@ -1,0 +1,537 @@
+/* Find My Size (spec 005). Bottom sheet on phones, centred card on larger screens. */
+
+.fms-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.45);
+  animation: fms-fade 0.18s ease;
+}
+
+.fms-sheet {
+  display: flex;
+  flex-direction: column;
+  width: min(460px, 100%);
+  max-height: min(720px, 100%);
+  overflow: hidden;
+  border-radius: 14px;
+  background: #fff;
+  color: var(--color-text, #000);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+.fms-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--color-border, #e8e8e8);
+}
+
+.fms-title {
+  margin: 0;
+  font-family: var(--font-header);
+  font-size: 20px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  outline: none;
+}
+
+.fms-close {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin: -8px -10px -8px 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.fms-close svg {
+  width: 22px;
+  height: 22px;
+}
+
+.fms-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.fms-lead {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.fms-note {
+  margin: 0;
+  color: #6b6b6b;
+  font-size: 12.5px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+/* Step 1: choose a unit */
+.fms-units {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.fms-unit {
+  display: grid;
+  gap: 4px;
+  min-height: 92px;
+  padding: 16px 12px;
+  border: 1.5px solid var(--color-border, #e0e0e0);
+  border-radius: 12px;
+  background: #fff;
+  font: inherit;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.fms-unit:hover,
+.fms-unit:focus-visible {
+  border-color: #000;
+  background: #fafafa;
+}
+
+.fms-unit strong {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.fms-unit span {
+  color: #6b6b6b;
+  font-size: 13px;
+}
+
+/* Step 2: questions */
+.fms-units-line {
+  margin: 0;
+  color: #555;
+  font-size: 13.5px;
+}
+
+.fms-field {
+  display: grid;
+  gap: 6px;
+}
+
+.fms-field > label,
+.fms-label,
+.fms-fits legend {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.fms-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  border: 1px solid #cfcfcf;
+  border-radius: 8px;
+  background: #fff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.fms-input:focus-within {
+  border-color: #000;
+  box-shadow: 0 0 0 1px #000;
+}
+
+.fms-field.has-error .fms-input {
+  border-color: #b3261e;
+}
+
+.fms-input input {
+  width: 100%;
+  min-width: 0;
+  height: 46px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  font: inherit;
+  font-size: 16px; /* 16px stops iOS from zooming in */
+  outline: none;
+}
+
+.fms-input__suffix {
+  padding-right: 12px;
+  color: #6b6b6b;
+  font-size: 14px;
+}
+
+.fms-pair {
+  display: flex;
+  gap: 10px;
+}
+
+.fms-select {
+  height: 48px;
+  padding: 0 12px;
+  border: 1px solid #cfcfcf;
+  border-radius: 8px;
+  background: #fff;
+  font: inherit;
+  font-size: 16px;
+}
+
+.fms-error {
+  margin: 0;
+  color: #b3261e;
+  font-size: 13px;
+}
+
+.fms-weight {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.fms-weight .fms-field {
+  flex: 1;
+}
+
+.fms-toggle {
+  display: inline-flex;
+  height: 48px;
+  padding: 3px;
+  border-radius: 8px;
+  background: #f0f0f0;
+}
+
+.fms-weight .fms-field.has-error + .fms-toggle {
+  margin-bottom: 25px;
+}
+
+.fms-toggle button {
+  min-width: 44px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.fms-toggle button[aria-pressed="true"] {
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  font-weight: 600;
+}
+
+.fms-fits {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.fms-fits legend {
+  margin-bottom: 8px;
+  padding: 0;
+}
+
+.fms-pills {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.fms-pill {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  border: 1px solid #cfcfcf;
+  border-radius: 999px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.fms-pill input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.fms-pill.is-on {
+  border-color: #000;
+  background: #000;
+  color: #fff;
+}
+
+.fms-pill:has(input:focus-visible) {
+  outline: 2px solid #000;
+  outline-offset: 2px;
+}
+
+.fms-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.fms-check input {
+  width: 18px;
+  height: 18px;
+  accent-color: #000;
+}
+
+.fms-primary,
+.fms-secondary {
+  width: 100%;
+  min-height: 50px;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+}
+
+.fms-primary {
+  border: 0;
+  background: #000;
+  color: #fff;
+}
+
+.fms-primary:hover {
+  background: #262626;
+}
+
+.fms-secondary {
+  border: 1px solid #000;
+  background: #fff;
+  color: #000;
+}
+
+.fms-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+/* Step 3: result */
+.fms-result {
+  display: grid;
+  gap: 10px;
+  text-align: center;
+}
+
+.fms-result__eyebrow {
+  margin: 0;
+  color: #6b6b6b;
+  font-size: 13px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.fms-result__size {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin: 0;
+  font-family: var(--font-header);
+  font-size: 56px;
+  line-height: 1.05;
+}
+
+.fms-result__reason {
+  margin: 0;
+  color: #333;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.fms-badge {
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: #f2f2f2;
+  color: #6b6b6b;
+  font-family: var(--font-body);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.fms-how {
+  border-top: 1px solid var(--color-border, #e8e8e8);
+  padding-top: 12px;
+  font-size: 14px;
+}
+
+.fms-how summary {
+  min-height: 32px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.fms-how p {
+  margin: 8px 0 10px;
+  color: #444;
+  line-height: 1.5;
+}
+
+.fms-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.fms-table th,
+.fms-table td {
+  padding: 7px 6px;
+  border-bottom: 1px solid #eee;
+}
+
+.fms-table th {
+  color: #6b6b6b;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.fms-table tr.is-pick td {
+  background: #f5f5f5;
+  font-weight: 600;
+}
+
+.fms-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 18px;
+  padding-top: 4px;
+  font-size: 13.5px;
+}
+
+/* Product page trigger + "Your size" chip */
+.fms-trigger {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+  margin-top: 12px;
+  font-size: 14px;
+}
+
+.fms-trigger__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.fms-trigger__icon {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.5;
+}
+
+.fms-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid #000;
+  border-radius: 999px;
+  background: #fff;
+  font: inherit;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.fms-chip.is-selected {
+  background: #000;
+  color: #fff;
+}
+
+.fms-chip strong {
+  font-weight: 600;
+}
+
+/* Fade the dimmed backdrop only — fading opacity would also make the sheet see-through. */
+@keyframes fms-fade {
+  from {
+    background-color: rgba(0, 0, 0, 0);
+  }
+}
+
+@keyframes fms-rise {
+  from {
+    transform: translateY(100%);
+  }
+}
+
+@media (max-width: 600px) {
+  .fms-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
+  .fms-sheet {
+    width: 100%;
+    max-height: 92vh;
+    max-height: 92dvh;
+    border-radius: 16px 16px 0 0;
+    animation: fms-rise 0.25s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .fms-body {
+    padding-bottom: calc(20px + env(safe-area-inset-bottom));
+  }
+
+  .fms-result__size {
+    font-size: 48px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fms-overlay,
+  .fms-sheet {
+    animation: none;
+  }
+}
+
+/* The product meta column is centred on phones (Product.css): match it. */
+@media (max-width: 768px) {
+  .fms-trigger {
+    justify-content: center;
+    margin-top: 4px;
+  }
+}

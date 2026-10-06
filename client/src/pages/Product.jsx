@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { fetchProduct } from "../api/products";
 import { MAX_QTY, useCart } from "../context/CartContext";
@@ -7,6 +7,9 @@ import { addRecentlyViewed } from "../utils/recentlyViewed";
 import QtySelector from "../components/common/QtySelector";
 import ProductGallery from "../components/product/ProductGallery";
 import SizeChartModal from "../components/product/SizeChartModal";
+import FindMySize from "../components/product/FindMySize";
+import { parseChart, recommend } from "../utils/sizeFinder";
+import { loadProfile } from "../utils/fitProfile";
 
 const BOTTOM_TYPES = /JEANS|PANTS|TROUSERS|CHINOS|CARGOS|SHORTS|SWEATPANTS|BOXERS/;
 
@@ -81,6 +84,13 @@ function ProductSingle({ product }) {
   const [open, setOpen] = useState({ description: false, care: false });
   const [chartOpen, setChartOpen] = useState(false);
   const [added, setAdded] = useState(false);
+  // Find My Size (spec 005): this product's chart, read on the device; null = no link (R-5).
+  const chart = useMemo(
+    () => (product.sizeChart ? parseChart(product.sizeChart, { sizes: variants.map((v) => v.size), productType: product.productType }) : null),
+    [product]
+  );
+  const [fitProfile, setFitProfile] = useState(loadProfile);
+  const [fmsOpen, setFmsOpen] = useState(null); // null | "auto" | "edit"
   const { addItem } = useCart();
   const navigate = useNavigate();
 
@@ -111,6 +121,21 @@ function ProductSingle({ product }) {
   };
 
   const closeChart = useCallback(() => setChartOpen(false), []);
+  const closeFms = useCallback(() => setFmsOpen(null), []);
+
+  // Answers given on another product (or another tab) show up here too (AC-2.1).
+  useEffect(() => {
+    const refresh = () => setFitProfile(loadProfile());
+    window.addEventListener("shopnest:fit-changed", refresh);
+    window.addEventListener("storage", refresh);
+    return () => {
+      window.removeEventListener("shopnest:fit-changed", refresh);
+      window.removeEventListener("storage", refresh);
+    };
+  }, []);
+
+  const inStock = variants.filter((v) => v.available).map((v) => v.size);
+  const yourSize = chart && fitProfile[chart.kind] ? recommend(chart, fitProfile[chart.kind], inStock) : null;
 
   const toggle = (key) => setOpen((o) => ({ ...o, [key]: !o[key] }));
 
@@ -176,6 +201,39 @@ function ProductSingle({ product }) {
                 </label>
               ))}
             </div>
+            {chart && (
+              <div className="fms-trigger">
+                {!yourSize ? (
+                  <button type="button" className="fms-trigger__link" onClick={() => setFmsOpen("auto")}>
+                    <svg viewBox="0 0 24 24" aria-hidden="true" className="fms-trigger__icon">
+                      <path d="M3 8.5 8.5 3 21 15.5 15.5 21z M7 10l2-2 M10 13l2-2 M13 16l2-2" />
+                    </svg>
+                    Find my size
+                  </button>
+                ) : yourSize.status === "ok" || yourSize.status === "between" ? (
+                  <>
+                    <button
+                      type="button"
+                      className={`fms-chip${size === yourSize.pick.size ? " is-selected" : ""}`}
+                      aria-pressed={size === yourSize.pick.size}
+                      onClick={() => setSize(yourSize.pick.size)}
+                    >
+                      Your size: <strong>{yourSize.status === "between" ? `${yourSize.pick.size} or ${yourSize.alt.size}` : yourSize.pick.size}</strong>
+                    </button>
+                    <button type="button" className="fms-trigger__link" onClick={() => setFmsOpen("result")}>
+                      Why?
+                    </button>
+                    <button type="button" className="fms-trigger__link" onClick={() => setFmsOpen("edit")}>
+                      Edit
+                    </button>
+                  </>
+                ) : (
+                  <button type="button" className="fms-trigger__link" onClick={() => setFmsOpen("result")}>
+                    {yourSize.status === "soldOut" ? `Your size ${yourSize.soldOut.size} is sold out — see options` : "Your size: check the size chart"}
+                  </button>
+                )}
+              </div>
+            )}
           </fieldset>
         )}
 
@@ -251,6 +309,19 @@ function ProductSingle({ product }) {
         </Link>
       </div>
 
+      {fmsOpen && chart && (
+        <FindMySize
+          chart={chart}
+          available={inStock}
+          startWith={fmsOpen}
+          onSelect={setSize}
+          onShowChart={() => {
+            setFmsOpen(null);
+            setChartOpen(true);
+          }}
+          onClose={closeFms}
+        />
+      )}
       {chartOpen && <SizeChartModal html={product.sizeChart} guideSection={guideSection(product)} onClose={closeChart} />}
     </div>
   );
