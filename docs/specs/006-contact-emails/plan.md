@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Spec** | [`spec.md`](spec.md) |
-| **Status** | Approved (2026-10-06) |
+| **Status** | Done (2026-10-06) |
 
 ## Changes
 

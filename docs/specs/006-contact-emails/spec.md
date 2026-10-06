@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Approved (2026-10-06) |
+| **Status** | Done (2026-10-06) |
 | **Owner** | ShopNest |
 | **Created** | 2026-10-06 |
 | **Builds on** | [Spec 001 — Email notifications](../001-email-notifications/spec.md) |
