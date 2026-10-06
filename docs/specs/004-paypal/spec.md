@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Approved (2026-10-06) |
+| **Status** | Done (2026-10-06) — live in simulated mode; sandbox/live verified against a mock PayPal (final check needs a client's keys, see README-client.md) |
 | **Owner** | ShopNest |
 | **Created** | 2026-10-06 |
 | **Next steps** | `plan.md` (how) → `tasks.md` (steps) → implementation |

@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Spec** | [`spec.md`](spec.md) (approved 2026-10-06) |
-| **Status** | Approved (2026-10-06) |
+| **Status** | Done (2026-10-06) — live in simulated mode; sandbox/live verified against a mock PayPal (final check needs a client's keys, see README-client.md) |
 | **Next step** | [`tasks.md`](tasks.md) |
 
 How we build spec 004. Decisions point back to acceptance criteria (AC-x.y) and rules (R-n).

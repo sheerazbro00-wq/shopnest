@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Spec / Plan** | [`spec.md`](spec.md) · [`plan.md`](plan.md) |
-| **Status** | In progress — Phases 1–5 done; go-live next |
+| **Status** | Done (2026-10-06) — all 31 tasks complete |
 
 ## Phase 1 — Server foundation
 
@@ -48,8 +48,8 @@
 
 ## Phase 6 — Go live (simulated)
 
-- [ ] **T6.1** Vercel: `PAYPAL_MODE=simulated`, `PAYPAL_USD_RATE=280`.
-- [ ] **T6.2** Commit, push, deploys done.
-- [ ] **T6.3** Owner's phone: full PayPal test order; receipt + TEST owner alert received.
+- [x] **T6.1** Vercel: `PAYPAL_MODE=simulated`, `PAYPAL_USD_RATE=280`.
+- [x] **T6.2** Commit, push, deploys done.
+- [x] **T6.3** Owner's phone: full PayPal test order; receipt + TEST owner alert received. — #1102 on 2026-10-06: receipt + "(PayPal TEST)" alert both delivered
 - [x] **T6.4** Client hand-over notes (`README-client.md`).
-- [ ] **T6.5** Mark spec and tasks Done.
+- [x] **T6.5** Mark spec and tasks Done.
