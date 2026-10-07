@@ -24,6 +24,14 @@ const PAYMENTS = [
   { value: "paypal", label: "PayPal" },
 ];
 
+// Orders before spec 008 count as rupee orders (R-7).
+const CURRENCIES = [
+  { value: "", label: "All currencies" },
+  { value: "PKR", label: "PKR (Rs)" },
+  { value: "USD", label: "USD ($)" },
+  { value: "GBP", label: "GBP (£)" },
+];
+
 const SORTS = [
   { value: "", label: "Newest first" },
   { value: "oldest", label: "Oldest first" },
@@ -36,6 +44,7 @@ export default function Orders() {
   const [params, setParams] = useSearchParams();
   const status = params.get("status") || "";
   const payment = params.get("payment") || "";
+  const currency = params.get("currency") || "";
   const sort = params.get("sort") || "";
   const q = params.get("q") || "";
   const page = Math.max(1, parseInt(params.get("page")) || 1);
@@ -68,7 +77,7 @@ export default function Orders() {
     const controller = new AbortController();
     setLoading(true);
     setError("");
-    fetchAdminOrders({ status, payment, sort, q, page }, controller.signal)
+    fetchAdminOrders({ status, payment, currency, sort, q, page }, controller.signal)
       .then((d) => {
         setData(d);
         setLoading(false);
@@ -79,9 +88,9 @@ export default function Orders() {
         setLoading(false);
       });
     return () => controller.abort();
-  }, [status, payment, sort, q, page]);
+  }, [status, payment, currency, sort, q, page]);
 
-  const filtered = Boolean(q || payment);
+  const filtered = Boolean(q || payment || currency);
   const from = data ? (data.page - 1) * data.pageSize + 1 : 0;
   const to = data ? Math.min(data.page * data.pageSize, data.total) : 0;
 
@@ -124,6 +133,16 @@ export default function Orders() {
             {PAYMENTS.map((p) => (
               <option key={p.value} value={p.value}>
                 {p.label}
+              </option>
+            ))}
+          </select>
+          <label className="visually-hidden" htmlFor="OrderCurrency">
+            Currency
+          </label>
+          <select id="OrderCurrency" className="adm-select" value={currency} onChange={(e) => update({ currency: e.target.value })}>
+            {CURRENCIES.map((c) => (
+              <option key={c.value} value={c.value}>
+                {c.label}
               </option>
             ))}
           </select>

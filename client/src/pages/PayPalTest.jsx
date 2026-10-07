@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { errorMessage, fetchOrder, simulatePayPal } from "../api/orders";
 import { money } from "../components/checkout/money";
+import { formatMinor } from "../utils/pricing";
 import "../components/checkout/Checkout.css";
 
 // Stand-in for PayPal's approval page in simulated mode (spec 004 §4). Plainly marked as
@@ -54,8 +55,12 @@ export default function PayPalTest() {
           <>
             <p className="ppt__eyebrow">Test payment</p>
             <h1 className="ppt__title">Pay ShopNest</h1>
-            <p className="ppt__amount">${order.paypal.usd}</p>
-            <p className="ppt__rupees">{money(order.totalPrice)} at Rs {order.paypal.rate} per US dollar</p>
+            {/* The exact amount PayPal would take: order.charge (spec 008), or spec 004's USD figure. */}
+            <p className="ppt__amount">{order.charge ? formatMinor(order.charge.total, order.charge.currency) : `$${order.paypal.usd}`}</p>
+            <p className="ppt__rupees">
+              {money(order.totalPrice)} at Rs {order.charge?.rate ?? order.paypal.rate} per{" "}
+              {{ USD: "US dollar", GBP: "British pound" }[order.charge?.currency || "USD"]}
+            </p>
             <dl className="ppt__rows">
               <div>
                 <dt>Order</dt>

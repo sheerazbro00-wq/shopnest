@@ -6,8 +6,12 @@ const { clientUrl } = require("../../config/client");
 //   createPayment  — at checkout: where to send the shopper to approve
 //   confirmPayment — when they come back: take the money, check the amount (R-1)
 
-// Rs → USD with 2 decimals, as the exact string PayPal expects (plan §3).
-const toUsd = (rupees, rate = paypal.rate) => (Math.round((rupees / rate) * 100) / 100).toFixed(2);
+// The exact amount PayPal must take: the order's charge (spec 008), or the USD figure that
+// orders from spec 004 saved. → { currency_code, value: "39.57" }
+const amountOf = (order) =>
+  order.charge
+    ? { currency_code: order.charge.currency, value: (order.charge.total / 100).toFixed(2) }
+    : { currency_code: "USD", value: order.paypal.usd };
 
 const returnUrl = (order, token) => `${clientUrl}/checkout/paypal-return/${order._id}?t=${token}`;
 const cancelUrl = () => `${clientUrl}/checkout?canceled=paypal`;
@@ -47,7 +51,7 @@ async function createPayment(order, accessToken) {
           reference_id: String(order._id),
           custom_id: String(order.orderNumber),
           description: `ShopNest order #${order.orderNumber}`,
-          amount: { currency_code: "USD", value: order.paypal.usd },
+          amount: amountOf(order),
         },
       ],
       payment_source: {
@@ -90,11 +94,12 @@ async function confirmPayment(order) {
 
   const capture = captureOf(data);
   if (!capture || capture.status !== "COMPLETED") return { paid: false, reason: `capture ${capture?.status || "missing"}` };
-  if (capture.amount?.currency_code !== "USD" || capture.amount?.value !== order.paypal.usd) {
+  const want = amountOf(order); // amount AND currency (spec 008 R-4)
+  if (capture.amount?.currency_code !== want.currency_code || capture.amount?.value !== want.value) {
     console.error(`[paypal] amount mismatch on order #${order.orderNumber}: got ${capture.amount?.currency_code} ${capture.amount?.value}`);
     return { paid: false, reason: "amount mismatch" };
   }
   return { paid: true, captureId: capture.id, payerEmail: data.payment_source?.paypal?.email_address };
 }
 
-module.exports = { toUsd, createPayment, confirmPayment };
+module.exports = { amountOf, createPayment, confirmPayment };

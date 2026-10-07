@@ -7,8 +7,8 @@ import { useCart } from "../../context/CartContext";
 import AccountLayout from "../../components/account/AccountLayout";
 import { orderStatus, shortDate } from "../../components/account/orderStatus";
 import OrderSummary from "../../components/checkout/OrderSummary";
-import { money } from "../../components/checkout/money";
-import { paymentLabel, usdOf } from "../../utils/payment";
+import { paymentLabel } from "../../utils/payment";
+import { paidAmount, summaryOf } from "../../utils/orderMoney";
 
 const STEPS = ["Confirmed", "On its way", "Delivered"];
 
@@ -74,14 +74,6 @@ export default function OrderDetail() {
 
   const status = orderStatus(order);
   const a = order.shippingAddress;
-  const lines = order.orderItems.map((i, n) => ({
-    key: `${i.product}_${i.size}_${n}`,
-    image: i.image,
-    name: i.name,
-    variant: [i.color, i.size].filter(Boolean).join(" / "),
-    qty: i.qty,
-    lineTotal: i.price * i.qty,
-  }));
 
   return (
     <AccountLayout title={`Order #${order.orderNumber}`}>
@@ -119,7 +111,7 @@ export default function OrderDetail() {
 
           <section className="acc-card">
             <h2 className="acc-card__title">Items</h2>
-            <OrderSummary lines={lines} itemsPrice={order.itemsPrice} shippingPrice={order.shippingPrice} total={order.totalPrice} />
+            <OrderSummary {...summaryOf(order)} />
           </section>
         </div>
 
@@ -142,7 +134,7 @@ export default function OrderDetail() {
                 </>
               )}
               <br />
-              {a.city} {a.postalCode}
+              {[a.city, a.state, a.postalCode].filter(Boolean).join(" ")}
               <br />
               {a.country}
             </p>
@@ -154,7 +146,7 @@ export default function OrderDetail() {
               {" · "}
               {order.isPaid ? "Paid" : order.paymentMethod === "COD" ? "Pay on delivery" : "Pending"}
             </p>
-            <p className="co-muted">{order.paymentMethod === "PayPal" ? `${usdOf(order)} (${money(order.totalPrice)})` : money(order.totalPrice)}</p>
+            <p className="co-muted">{paidAmount(order)}</p>
           </section>
           <section className="acc-card acc-info">
             <h3>Shipping method</h3>

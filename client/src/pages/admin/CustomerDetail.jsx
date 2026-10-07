@@ -90,7 +90,7 @@ export default function CustomerDetail() {
   const allOrdersLink = `/admin/orders?q=${encodeURIComponent(c.email)}`;
   const last = c.lastOrder;
   const a = c.address;
-  const addressText = a ? [`${a.firstName} ${a.lastName}`, a.address, a.apartment, [a.city, a.postalCode].filter(Boolean).join(" "), a.country].filter(Boolean).join("\n") : "";
+  const addressText = a ? [`${a.firstName} ${a.lastName}`, a.address, a.apartment, [a.city, a.state, a.postalCode].filter(Boolean).join(" "), a.country].filter(Boolean).join("\n") : "";
 
   return (
     <AdminPage

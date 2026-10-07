@@ -4,8 +4,8 @@ import { errorMessage, fetchOrder } from "../api/orders";
 import { useCart } from "../context/CartContext";
 import CheckoutLayout from "../components/checkout/CheckoutLayout";
 import OrderSummary from "../components/checkout/OrderSummary";
-import { money } from "../components/checkout/money";
-import { isOnline, usdOf } from "../utils/payment";
+import { isOnline } from "../utils/payment";
+import { orderAmounts, paidAmount, summaryOf } from "../utils/orderMoney";
 
 export default function ThankYou() {
   const { id } = useParams();
@@ -30,7 +30,7 @@ export default function ThankYou() {
 
   if (error) {
     return (
-      <CheckoutLayout summary={null} total={0}>
+      <CheckoutLayout summary={null} total="">
         <div className="co-thanks__missing">
           <h2>{error}</h2>
           <Link to="/" className="co-submit co-submit--inline">
@@ -43,7 +43,7 @@ export default function ThankYou() {
 
   if (!order) {
     return (
-      <CheckoutLayout summary={null} total={0}>
+      <CheckoutLayout summary={null} total="">
         <p className="co-muted co-thanks__loading">Loading your order…</p>
       </CheckoutLayout>
     );
@@ -52,20 +52,12 @@ export default function ThankYou() {
   const a = order.shippingAddress;
   const unpaidOnline = isOnline(order) && !order.isPaid;
   const viaPayPal = order.paymentMethod === "PayPal";
-  const lines = order.orderItems.map((i, n) => ({
-    key: `${i.product}_${i.size}_${n}`,
-    image: i.image,
-    name: i.name,
-    variant: [i.color, i.size].filter(Boolean).join(" / "),
-    qty: i.qty,
-    lineTotal: i.price * i.qty,
-  }));
-  const summary = (
-    <OrderSummary lines={lines} itemsPrice={order.itemsPrice} shippingPrice={order.shippingPrice} total={order.totalPrice} />
-  );
+  // Amounts in the order's own currency: $/£ for US/UK orders (spec 008 AC-3.2).
+  const view = summaryOf(order);
+  const summary = <OrderSummary {...view} />;
 
   return (
-    <CheckoutLayout summary={summary} total={order.totalPrice}>
+    <CheckoutLayout summary={summary} total={view.total}>
       <div className="co-thanks">
         <div className="co-thanks__head">
           <svg className="co-thanks__check" viewBox="0 0 50 50" aria-hidden="true">
@@ -95,7 +87,7 @@ export default function ThankYou() {
               <h3>Your order is confirmed</h3>
               <p>
                 {order.paymentMethod === "COD"
-                  ? `We've received your order. Please keep ${money(order.totalPrice)} ready in cash for the rider.`
+                  ? `We've received your order. Please keep ${orderAmounts(order).total} ready in cash for the rider.`
                   : "We've received your payment and your order is being prepared."}
               </p>
             </>
@@ -122,7 +114,7 @@ export default function ThankYou() {
                       ? "Paid by card"
                       : "Card (unpaid)"}
                 {" · "}
-                {viaPayPal ? `${usdOf(order)} (${money(order.totalPrice)})` : money(order.totalPrice)}
+                {paidAmount(order)}
               </p>
             </div>
             <div>
@@ -138,7 +130,7 @@ export default function ThankYou() {
                   </>
                 )}
                 <br />
-                {a.city} {a.postalCode}
+                {[a.city, a.state, a.postalCode].filter(Boolean).join(" ")}
                 <br />
                 {a.country}
                 <br />
@@ -147,7 +139,7 @@ export default function ThankYou() {
             </div>
             <div>
               <h4>Shipping method</h4>
-              <p>{order.shippingPrice ? "Standard Shipping" : "Free Shipping"}</p>
+              <p>{!order.shippingPrice ? "Free Shipping" : view.currency === "PKR" ? "Standard Shipping" : "International Shipping"}</p>
             </div>
           </div>
         </div>

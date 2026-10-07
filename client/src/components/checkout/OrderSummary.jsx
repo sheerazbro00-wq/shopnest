@@ -1,8 +1,9 @@
 import { sized } from "../../utils/format";
-import { money } from "./money";
 
-// lines: [{ key, image, name, variant, qty, lineTotal }]
-export default function OrderSummary({ lines, itemsPrice, shippingPrice, total }) {
+// Amounts arrive already formatted in the order's currency (spec 008): checkout builds
+// them from its quote, saved orders from utils/orderMoney `summaryOf`.
+// lines: [{ key, image, name, variant, qty, price }]; shipping "" = free.
+export default function OrderSummary({ lines, items, shipping, total, currency = "PKR" }) {
   const count = lines.reduce((sum, l) => sum + l.qty, 0);
 
   return (
@@ -20,7 +21,7 @@ export default function OrderSummary({ lines, itemsPrice, shippingPrice, total }
               <p className="co-line__name">{l.name}</p>
               {l.variant && <p className="co-line__variant">{l.variant}</p>}
             </div>
-            <span className="co-line__price">{money(l.lineTotal)}</span>
+            <span className="co-line__price">{l.price}</span>
           </li>
         ))}
       </ul>
@@ -30,16 +31,16 @@ export default function OrderSummary({ lines, itemsPrice, shippingPrice, total }
           <dt>
             Subtotal · {count} {count === 1 ? "item" : "items"}
           </dt>
-          <dd>{money(itemsPrice)}</dd>
+          <dd>{items}</dd>
         </div>
         <div>
           <dt>Shipping</dt>
-          <dd>{shippingPrice === 0 ? "FREE" : money(shippingPrice)}</dd>
+          <dd>{shipping || "FREE"}</dd>
         </div>
         <div className="co-totals__total">
           <dt>Total</dt>
           <dd>
-            <small>PKR</small> {money(total)}
+            <small>{currency}</small> {total}
           </dd>
         </div>
       </dl>

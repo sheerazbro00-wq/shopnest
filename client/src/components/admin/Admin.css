@@ -633,6 +633,14 @@
   text-align: right;
 }
 
+/* spec 008: rupee value under a $/£ order total */
+.adm-total-sub {
+  display: block;
+  color: var(--adm-muted, #6d7175);
+  font-size: 11.5px;
+  font-weight: 400;
+}
+
 .adm-table tbody tr.is-link {
   cursor: pointer;
 }

@@ -11,7 +11,21 @@ const orderItemSchema = new mongoose.Schema(
     sku: String,
     qty: { type: Number, required: true, min: 1 },
     price: { type: Number, required: true, min: 0 }, // unit price from the DB at order time
+    unitCharge: Number, // the same unit price in the charge currency, minor units (spec 008)
     image: String,
+  },
+  { _id: false }
+);
+
+// What the payment provider charges (spec 008 plan §2). Amounts are integers in minor
+// units (cents/pence/paisa) and the rate is locked when the order is placed (R-1).
+const chargeSchema = new mongoose.Schema(
+  {
+    currency: { type: String, enum: ["PKR", "USD", "GBP"], required: true },
+    rate: { type: Number, required: true }, // rupees per unit (1 for PKR)
+    items: { type: Number, required: true },
+    shipping: { type: Number, required: true },
+    total: { type: Number, required: true },
   },
   { _id: false }
 );
@@ -32,8 +46,10 @@ const orderSchema = new mongoose.Schema(
       address: { type: String, required: true },
       apartment: String,
       city: { type: String, required: true },
+      state: String, // US state code / UK county (spec 008)
       postalCode: String,
       country: { type: String, default: "Pakistan" },
+      countryCode: { type: String, enum: ["PK", "US", "GB"], default: "PK" },
     },
     paymentMethod: { type: String, enum: ["COD", "Card", "PayPal"], required: true },
     stripeSessionId: String,
@@ -46,6 +62,10 @@ const orderSchema = new mongoose.Schema(
       captureId: String, // PayPal's transaction id
     },
     paymentResult: { id: String, status: String, email: String },
+    // Receipt currency. Differs from charge.currency only for Pakistan + PayPal (PayPal has no PKR).
+    currency: { type: String, enum: ["PKR", "USD", "GBP"], default: "PKR" },
+    charge: { type: chargeSchema, default: undefined }, // absent on orders before spec 008 (R-7)
+    // Rupee prices stay the source of truth for revenue and reports (R-5).
     itemsPrice: { type: Number, required: true },
     shippingPrice: { type: Number, required: true },
     totalPrice: { type: Number, required: true },

@@ -4,7 +4,7 @@ import { fetchMyOrders } from "../../api/account";
 import { errorMessage } from "../../api/orders";
 import AccountLayout from "../../components/account/AccountLayout";
 import { orderStatus, shortDate } from "../../components/account/orderStatus";
-import { money } from "../../components/checkout/money";
+import { orderAmounts } from "../../utils/orderMoney";
 import { sized } from "../../utils/format";
 
 const MAX_THUMBS = 4;
@@ -34,7 +34,7 @@ function OrderCard({ order }) {
           {count} {count === 1 ? "item" : "items"}
         </p>
         <p className="acc-order__number">Order #{order.orderNumber}</p>
-        <p className="acc-order__total">{money(order.totalPrice)}</p>
+        <p className="acc-order__total">{orderAmounts(order).total}</p>
       </div>
     </Link>
   );

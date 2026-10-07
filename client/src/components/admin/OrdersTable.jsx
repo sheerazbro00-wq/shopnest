@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { STATUS_BADGE, orderDate, paymentBadge, paymentLabel, rupees } from "./format";
+import { formatMinor } from "../../utils/pricing";
 
 export const Badge = ({ label, tone }) => <span className={`adm-badge adm-badge--${tone}`}>{label}</span>;
 
@@ -56,7 +57,15 @@ export default function OrdersTable({ orders, search = "" }) {
               </td>
               <td className="num adm-hide-sm">{o.items}</td>
               <td data-slot="total" className="num">
-                {rupees(o.totalPrice)}
+                {/* US/UK orders: what the customer paid, with the store's rupee value under it (spec 008 AC-6.2) */}
+                {o.chargeTotal ? (
+                  <>
+                    {formatMinor(o.chargeTotal, o.currency)}
+                    <span className="adm-total-sub">{rupees(o.totalPrice)}</span>
+                  </>
+                ) : (
+                  rupees(o.totalPrice)
+                )}
               </td>
             </tr>
           ))}

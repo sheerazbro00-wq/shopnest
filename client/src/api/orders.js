@@ -1,16 +1,8 @@
 import api from "./axios";
 
-let configPromise;
-export const fetchCheckoutConfig = () => {
-  configPromise ||= api
-    .get("/orders/config")
-    .then((res) => res.data)
-    .catch((err) => {
-      configPromise = null;
-      throw err;
-    });
-  return configPromise;
-};
+// Fetched fresh on every checkout visit: it carries the exchange rates the server will
+// charge with (spec 008 R-2), so a cached copy could show a stale total.
+export const fetchCheckoutConfig = () => api.get("/orders/config").then((res) => res.data);
 
 export const placeOrder = (payload) => api.post("/orders/checkout", payload).then((res) => res.data);
 

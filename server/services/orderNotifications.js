@@ -2,7 +2,7 @@ const Order = require("../models/Order");
 const { emailEnabled, storeNotifyEmail } = require("../config/email");
 const { clientUrl } = require("../config/client");
 const { sendEmail } = require("./email/send");
-const { rupees } = require("./email/layout");
+const { orderAmounts } = require("./pricing");
 const orderConfirmation = require("./email/templates/orderConfirmation");
 const ownerAlert = require("./email/templates/ownerAlert");
 
@@ -11,11 +11,18 @@ const ownerAlert = require("./email/templates/ownerAlert");
 //   line:  shown in the receipt and the owner alert
 //   label: short form for the owner alert's subject
 const PAYMENT = {
-  COD: { line: (o) => `Pay ${rupees(o.totalPrice)} in cash on delivery`, label: "Cash on Delivery" },
-  Card: { line: () => "Paid by card", label: "Paid by card" },
-  // Charged in USD (spec 004); a simulated payment is flagged TEST to the owner (AC-4.2).
+  COD: { line: (o) => `Pay ${orderAmounts(o).total} in cash on delivery`, label: "Cash on Delivery" },
+  Card: {
+    line: (o) => (orderAmounts(o).currency === "PKR" ? "Paid by card" : `Paid by card — ${orderAmounts(o).total}`),
+    label: "Paid by card",
+  },
+  // Pakistan: shown in Rs, charged in $ (spec 004); US/UK: in their own currency (spec 008).
+  // A simulated payment is flagged TEST to the owner (spec 004 AC-4.2).
   PayPal: {
-    line: (o) => `Paid with PayPal — $${o.paypal?.usd} (${rupees(o.totalPrice)})`,
+    line: (o) => {
+      const m = orderAmounts(o);
+      return m.charged ? `Paid with PayPal — ${m.charged} (${m.total})` : `Paid with PayPal — ${m.total}`;
+    },
     label: (o) => (o.paypal?.mode === "simulated" ? "PayPal TEST" : "PayPal"),
   },
 };

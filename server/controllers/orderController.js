@@ -4,12 +4,15 @@ const Stripe = require("stripe");
 const Order = require("../models/Order");
 const Product = require("../models/Product");
 const Counter = require("../models/Counter");
-const { CURRENCY, FREE_SHIPPING_MIN, SHIPPING_FEE, MAX_QTY, MAX_LINES } = require("../config/shop");
+const { FREE_SHIPPING_MIN, SHIPPING_FEE, MAX_QTY, MAX_LINES, COUNTRIES, SHIPPING } = require("../config/shop");
 const { clientUrl } = require("../config/client");
 const { notifyOrderConfirmed } = require("../services/orderNotifications");
 const paypalConfig = require("../config/paypal");
 const paypal = require("../services/payments/paypal");
 const { markPaid } = require("../services/payments/markPaid");
+const { quote } = require("../services/pricing");
+const { getRates } = require("../services/exchangeRates");
+const { readCustomer } = require("../utils/address");
 
 // Card payments switch on only when a real-looking key is configured, so the
 // store still works (Cash on Delivery) with the placeholder key.
@@ -18,8 +21,6 @@ const cardEnabled = /^sk_(test|live)_[A-Za-z0-9]{20,}$/.test(stripeKey);
 const stripe = cardEnabled ? Stripe(stripeKey) : null;
 
 const httpError = (status, message) => Object.assign(new Error(message), { status });
-const shippingFor = (itemsPrice) => (itemsPrice >= FREE_SHIPPING_MIN ? 0 : SHIPPING_FEE);
-const clean = (v, max = 120) => (typeof v === "string" ? v.trim().slice(0, max) : "");
 
 // Never trust prices from the browser: re-read every line from the database.
 async function priceItems(items) {
@@ -52,27 +53,7 @@ async function priceItems(items) {
   });
 }
 
-function readCustomer(body) {
-  const email = clean(body.email, 254).toLowerCase();
-  const phone = clean(body.phone, 20).replace(/[\s-]/g, "");
-  const a = body.shippingAddress || {};
-  const shippingAddress = {
-    firstName: clean(a.firstName, 60),
-    lastName: clean(a.lastName, 60),
-    address: clean(a.address, 200),
-    apartment: clean(a.apartment, 100),
-    city: clean(a.city, 60),
-    postalCode: clean(a.postalCode, 10),
-    country: "Pakistan",
-  };
-
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) throw httpError(400, "Enter a valid email");
-  if (!/^(\+92|0)?3\d{9}$/.test(phone)) throw httpError(400, "Enter a valid mobile number, e.g. 03001234567");
-  for (const field of ["firstName", "lastName", "address", "city"]) {
-    if (!shippingAddress[field]) throw httpError(400, "Please complete your shipping address");
-  }
-  return { email, phone, shippingAddress, emailOptIn: Boolean(body.emailOptIn) };
-}
+// Contact + address checks per country: utils/address.js (spec 008 US-2).
 
 // Marks a card order paid once Stripe confirms it. Used by both the webhook
 // and the thank-you page, so it must be idempotent.
@@ -84,8 +65,12 @@ async function applyStripeSession(order, session) {
     return order;
   }
   if (session.payment_status !== "paid") return order;
-  if (session.amount_total !== Math.round(order.totalPrice * 100)) {
-    console.error(`Amount mismatch on order ${order.orderNumber}`);
+  // Amount AND currency must match what this order charges (spec 008 R-4). Orders from
+  // before spec 008 have no `charge` and were charged in rupees.
+  const wantAmount = order.charge ? order.charge.total : Math.round(order.totalPrice * 100);
+  const wantCurrency = (order.charge?.currency || "PKR").toLowerCase();
+  if (session.amount_total !== wantAmount || session.currency !== wantCurrency) {
+    console.error(`[stripe] amount/currency mismatch on order #${order.orderNumber}: got ${session.currency} ${session.amount_total}`);
     return order;
   }
   order.isPaid = true;
@@ -115,10 +100,21 @@ const METHODS = ["COD", ...ONLINE_METHODS];
 
 // GET /api/orders/config
 // PayPal reports only enabled + rate, never its mode: checkout looks the same in every mode (spec 004 AC-1.5).
+// `rates` are the very rates checkout will charge with, so the page shows the real total
+// (spec 008 R-2); never cached, unlike /api/currency.
 const getCheckoutConfig = async (req, res) => {
+  const [paypalEnabled, fx] = await Promise.all([paypalConfig.isReady(), getRates()]);
+  res.set("Cache-Control", "no-store");
   res.json({
     cardEnabled,
-    paypal: { enabled: await paypalConfig.isReady(), rate: paypalConfig.rate },
+    paypal: { enabled: paypalEnabled, rate: fx?.rates?.USD || paypalConfig.rate },
+    rates: fx?.rates || null,
+    fallbackUsdRate: paypalConfig.rate,
+    // No rates → Pakistan only (spec 008 R-6)
+    countries: Object.entries(COUNTRIES)
+      .filter(([code, c]) => code === "PK" || fx?.rates?.[c.currency])
+      .map(([code, c]) => ({ code, name: c.name, currency: c.currency, cod: c.cod })),
+    shipping: SHIPPING,
     freeShippingMin: FREE_SHIPPING_MIN,
     shippingFee: SHIPPING_FEE,
     maxQty: MAX_QTY,
@@ -152,26 +148,42 @@ const checkout = async (req, res) => {
   if (paymentMethod === "Card" && !cardEnabled) throw httpError(400, "Card payments are not available right now");
   if (paymentMethod === "PayPal" && !(await paypalConfig.isReady())) throw httpError(400, "PayPal is not available right now");
 
-  const customer = readCustomer(req.body);
+  const { countryCode, ...customer } = readCustomer(req.body);
+  if (paymentMethod === "COD" && !COUNTRIES[countryCode].cod) {
+    throw httpError(400, "Cash on Delivery is only available in Pakistan"); // spec 008 AC-5.2
+  }
   const orderItems = await priceItems(req.body.items);
-  const itemsPrice = orderItems.reduce((sum, i) => sum + i.price * i.qty, 0);
-  const shippingPrice = shippingFor(itemsPrice);
-  const totalPrice = itemsPrice + shippingPrice;
+
+  // Price in the shopper's currency with today's rate, decided here, never by the browser
+  // (spec 008 R-1, R-3). The rate is saved on the order and never changes afterwards.
+  const fx = await getRates();
+  const q = quote({ items: orderItems, countryCode, method: paymentMethod, rates: fx?.rates, fallbackUsdRate: paypalConfig.rate });
+
+  // The page showed one total; if the rate refreshed since, say so instead of charging a
+  // different amount (R-2). Older pages that send no `expected` skip this check.
+  const expected = req.body.expected;
+  if (expected && (expected.currency !== q.charge.currency || Number(expected.total) !== q.charge.total)) {
+    return res.status(409).json({
+      code: "PRICE_CHANGED",
+      message: "Prices were updated to today's exchange rate. Please review your total.",
+      quote: { currency: q.currency, charge: q.charge },
+    });
+  }
 
   const order = await Order.create({
     ...customer,
     orderNumber: await Counter.next("order"),
     user: req.user?._id,
-    orderItems,
+    orderItems: orderItems.map((i, k) => ({ ...i, unitCharge: q.unitCharges[k] })),
     paymentMethod,
-    itemsPrice,
-    shippingPrice,
-    totalPrice,
+    currency: q.currency,
+    charge: q.charge,
+    itemsPrice: q.itemsPrice,
+    shippingPrice: q.shippingPrice,
+    totalPrice: q.totalPrice,
     status: paymentMethod === "COD" ? "Pending" : "Awaiting payment",
-    // The dollar amount is fixed here, on the server, and is what PayPal must confirm (R-1).
-    ...(paymentMethod === "PayPal" && {
-      paypal: { mode: paypalConfig.mode, rate: paypalConfig.rate, usd: paypal.toUsd(totalPrice) },
-    }),
+    // The amount PayPal must confirm is order.charge, fixed here on the server (spec 004 R-1).
+    ...(paymentMethod === "PayPal" && { paypal: { mode: paypalConfig.mode, rate: q.charge.rate } }),
   });
   const { accessToken } = await Order.findById(order._id).select("+accessToken").lean();
   const result = { orderId: order._id, token: accessToken };
@@ -200,14 +212,22 @@ const checkout = async (req, res) => {
   try {
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
+      // The store already prices in the shopper's currency (spec 008). Stripe's Adaptive
+      // Pricing would offer to convert it again, at Stripe's own rate (e.g. $ → PKR for a
+      // visitor in Pakistan) — so the page always shows exactly the order's amount.
+      adaptive_pricing: { enabled: false },
+      // Checkout offers "Debit - Credit Card". In USD Stripe would also add Cash App, bank
+      // transfer and Klarna; bank payments settle days later, which this flow doesn't handle.
+      payment_method_types: ["card"],
       customer_email: customer.email,
       client_reference_id: String(order._id),
       metadata: { orderId: String(order._id), orderNumber: String(order.orderNumber) },
-      line_items: orderItems.map((i) => ({
+      // In the charge currency, with the exact minor units saved on the order (spec 008 US-3).
+      line_items: order.orderItems.map((i) => ({
         quantity: i.qty,
         price_data: {
-          currency: CURRENCY,
-          unit_amount: Math.round(i.price * 100),
+          currency: order.charge.currency.toLowerCase(),
+          unit_amount: i.unitCharge,
           product_data: {
             name: i.name,
             description: [i.color, i.size].filter(Boolean).join(" / ") || undefined,
@@ -219,8 +239,8 @@ const checkout = async (req, res) => {
         {
           shipping_rate_data: {
             type: "fixed_amount",
-            display_name: shippingPrice ? "Standard Shipping" : "Free Shipping",
-            fixed_amount: { amount: Math.round(shippingPrice * 100), currency: CURRENCY },
+            display_name: !order.charge.shipping ? "Free Shipping" : countryCode === "PK" ? "Standard Shipping" : "International Shipping",
+            fixed_amount: { amount: order.charge.shipping, currency: order.charge.currency.toLowerCase() },
           },
         },
       ],

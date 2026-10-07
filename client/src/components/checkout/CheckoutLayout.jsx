@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { ChevronDown } from "../Icons";
-import { money } from "./money";
 import "./Checkout.css";
 
 const POLICY_LINKS = [
@@ -21,6 +20,7 @@ const CheckoutBag = () => (
 
 // Standalone Shopify-style checkout shell: no store header/footer, form on the
 // left, grey order summary on the right (collapsible bar on mobile).
+// `total` is already formatted in the order's currency (spec 008).
 export default function CheckoutLayout({ summary, total, children }) {
   const [summaryOpen, setSummaryOpen] = useState(false);
 
@@ -43,7 +43,7 @@ export default function CheckoutLayout({ summary, total, children }) {
             Order summary
             <ChevronDown className="co-summary-toggle__icon" />
           </span>
-          <strong>{money(total)}</strong>
+          <strong>{total}</strong>
         </button>
         <div className="co-summary-toggle__panel">
           <div className="co-summary-toggle__inner">{summary}</div>

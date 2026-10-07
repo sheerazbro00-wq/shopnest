@@ -11,7 +11,7 @@ module.exports = function orderConfirmation({ order, orderUrl, paymentLine }) {
     ${heading(`Thank you, ${first}!`)}
     ${paragraph(`Your order <strong>#${escapeHtml(order.orderNumber)}</strong> is confirmed. We're getting it ready and will let you know when it ships.`)}
     <p style="margin:0 0 18px;font:400 13px Helvetica, Arial, sans-serif;color:#777777">Placed on ${escapeHtml(formatDate(order.createdAt))}</p>
-    ${itemsHtml(order.orderItems)}
+    ${itemsHtml(order)}
     ${totalsHtml(order, paymentLine)}
     ${addressHtml(order)}
     ${button(orderUrl, "View your order")}
@@ -21,7 +21,7 @@ module.exports = function orderConfirmation({ order, orderUrl, paymentLine }) {
 
 Your order #${order.orderNumber} is confirmed. Placed on ${formatDate(order.createdAt)}.
 
-${itemsText(order.orderItems)}
+${itemsText(order)}
 
 ${totalsText(order, paymentLine)}
 

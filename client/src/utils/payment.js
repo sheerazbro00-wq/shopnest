@@ -12,8 +12,4 @@ export function paymentLabel(order, { admin = false } = {}) {
   return "Card";
 }
 
-// "$21.25" for PayPal orders (charged in USD), else "".
-export const usdOf = (order) => (order.paypal?.usd ? `$${order.paypal.usd}` : "");
-
-// Same rounding as the server's toUsd(); the server's figure is the one charged.
-export const toUsd = (rupees, rate) => (Math.round((rupees / rate) * 100) / 100).toFixed(2);
+// Amounts in an order's currency: utils/orderMoney.js (spec 008).

@@ -1,12 +1,17 @@
 const { FONT, escapeHtml, rupees, formatDate, button, heading, layout, textFooter } = require("../layout");
 const { itemsHtml, totalsHtml, itemsText, totalsText } = require("./orderParts");
+const { orderAmounts } = require("../../pricing");
 
 // US-4: new-order alert for the store owner. Links to the admin panel, which
 // requires an admin login — so no access token is ever put in this email.
 module.exports = function ownerAlert({ order, adminUrl, paymentLine, paymentLabel }) {
   const a = order.shippingAddress || {};
   const customer = `${a.firstName || ""} ${a.lastName || ""}`.trim();
-  const subject = `New order #${order.orderNumber} — ${rupees(order.totalPrice)} (${paymentLabel})`;
+  // US/UK orders show both values: "$39.57 (Rs 10,950)" (spec 008 AC-6.1).
+  const money = orderAmounts(order);
+  const amount = money.currency === "PKR" ? money.total : `${money.total} (${rupees(order.totalPrice)})`;
+  const subject = `New order #${order.orderNumber} — ${amount} (${paymentLabel})`;
+  const foreign = money.currency !== "PKR";
   const count = order.orderItems.reduce((n, i) => n + i.qty, 0);
 
   const detail = (label, value) => `
@@ -21,10 +26,11 @@ module.exports = function ownerAlert({ order, adminUrl, paymentLine, paymentLabe
     <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-bottom:18px">
       ${detail("Customer", escapeHtml(customer))}
       ${detail("Phone", escapeHtml(order.phone))}
-      ${detail("City", escapeHtml(a.city))}
+      ${detail(foreign ? "Ships to" : "City", escapeHtml(foreign ? [a.city, a.country].filter(Boolean).join(", ") : a.city))}
       ${detail("Email", escapeHtml(order.email))}
+      ${foreign ? detail("In rupees", escapeHtml(`${rupees(order.totalPrice)} at Rs ${order.charge.rate} per ${money.currency}`)) : ""}
     </table>
-    ${itemsHtml(order.orderItems)}
+    ${itemsHtml(order)}
     ${totalsHtml(order, paymentLine)}
     ${button(adminUrl, "Open in admin")}`;
 
@@ -32,10 +38,11 @@ module.exports = function ownerAlert({ order, adminUrl, paymentLine, paymentLabe
 
 Customer: ${customer}
 Phone: ${order.phone}
-City: ${a.city || ""}
-Email: ${order.email}
+${foreign ? `Ships to: ${[a.city, a.country].filter(Boolean).join(", ")}` : `City: ${a.city || ""}`}
+Email: ${order.email}${foreign ? `
+In rupees: ${rupees(order.totalPrice)} at Rs ${order.charge.rate} per ${money.currency}` : ""}
 
-${itemsText(order.orderItems)}
+${itemsText(order)}
 
 ${totalsText(order, paymentLine)}
 

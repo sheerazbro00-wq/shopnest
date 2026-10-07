@@ -40,9 +40,16 @@ function paymentFilter(payment) {
   return {};
 }
 
-// GET /api/admin/orders?status=&payment=&q=&sort=&page=
+// Orders before spec 008 have no currency: they are rupee orders (R-7).
+function currencyFilter(currency) {
+  if (currency === "USD" || currency === "GBP") return { currency };
+  if (currency === "PKR") return { currency: { $in: ["PKR", null] } };
+  return {};
+}
+
+// GET /api/admin/orders?status=&payment=&currency=&q=&sort=&page=
 const listOrders = async (req, res) => {
-  const base = { ...searchFilter(req.query.q), ...paymentFilter(req.query.payment) };
+  const base = { ...searchFilter(req.query.q), ...paymentFilter(req.query.payment), ...currencyFilter(req.query.currency) };
   const status = STATUSES.includes(req.query.status) ? req.query.status : null;
   const filter = status ? { ...base, status } : base;
   const page = Math.max(1, parseInt(req.query.page) || 1);
@@ -53,7 +60,7 @@ const listOrders = async (req, res) => {
       .sort(sort)
       .skip((page - 1) * PAGE_SIZE)
       .limit(PAGE_SIZE)
-      .select("orderNumber createdAt email shippingAddress.firstName shippingAddress.lastName shippingAddress.city paymentMethod paypal.mode isPaid status totalPrice orderItems.qty")
+      .select("orderNumber createdAt email shippingAddress.firstName shippingAddress.lastName shippingAddress.city paymentMethod paypal.mode isPaid status totalPrice currency charge.currency charge.total orderItems.qty")
       .lean(),
     Order.countDocuments(filter),
     // Tab counts reflect the search + payment filters, but not the status tab itself.
@@ -73,6 +80,8 @@ const listOrders = async (req, res) => {
       isPaid: o.isPaid,
       status: o.status,
       totalPrice: o.totalPrice,
+      currency: o.currency || "PKR", // receipt currency (spec 008); old orders are rupees
+      chargeTotal: o.currency && o.currency !== "PKR" ? o.charge?.total : undefined, // minor units
       items: o.orderItems.reduce((n, i) => n + i.qty, 0),
     })),
     total,

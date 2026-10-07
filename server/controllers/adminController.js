@@ -48,7 +48,7 @@ const getDashboard = async (req, res) => {
     ]),
     Order.aggregate([{ $group: { _id: "$status", count: { $sum: 1 } } }]),
     Order.find({}).sort({ createdAt: -1, orderNumber: -1 }).limit(6)
-      .select("orderNumber createdAt shippingAddress.firstName shippingAddress.lastName email paymentMethod paypal.mode isPaid status totalPrice orderItems.qty")
+      .select("orderNumber createdAt shippingAddress.firstName shippingAddress.lastName email paymentMethod paypal.mode isPaid status totalPrice currency charge.currency charge.total orderItems.qty")
       .lean(),
     Order.aggregate([
       { $match: { ...SALE, createdAt: { $gte: from } } },
@@ -101,6 +101,8 @@ const getDashboard = async (req, res) => {
       isPaid: o.isPaid,
       status: o.status,
       totalPrice: o.totalPrice,
+      currency: o.currency || "PKR", // receipt currency (spec 008); old orders are rupees
+      chargeTotal: o.currency && o.currency !== "PKR" ? o.charge?.total : undefined, // minor units
     })),
     topProducts: top.map((t) => ({ handle: t._id, name: t.name, color: t.color, image: t.image, qty: t.qty, revenue: t.revenue })),
   });

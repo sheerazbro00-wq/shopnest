@@ -180,6 +180,10 @@
   font-weight: 650;
 }
 
+.od-sums__charged dd {
+  font-weight: 650;
+}
+
 .od-sums__paid {
   margin-top: 8px;
   padding-top: 10px !important;

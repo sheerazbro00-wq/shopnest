@@ -2,18 +2,21 @@ import { useEffect, useId, useRef, useState } from "react";
 import { COUNTRIES, countryOf } from "../../utils/currency";
 import { ChevronDown } from "../Icons";
 import Flag from "./Flag";
+import "./Currency.css";
 
 // Store-styled country dropdown (spec 007). Replaces the native <select>, whose
 // phone picker (an Android system dialog) didn't match the site. The list opens
 // inline, pushing content down, so it never falls off the bottom of a phone sheet.
 // Keyboard: Enter/Space/↓ opens, ↑/↓ move, Enter picks, Esc/Tab close.
-export default function CountryPicker({ id, value, onChange, labelledBy }) {
+// `codes` limits the choices (checkout offers only countries it can price, spec 008 R-6).
+export default function CountryPicker({ id, value, onChange, labelledBy, codes }) {
   const [open, setOpen] = useState(false);
   const listId = useId();
   const buttonRef = useRef(null);
   const listRef = useRef(null);
   const wrapRef = useRef(null);
   const current = countryOf(value);
+  const options = codes ? COUNTRIES.filter((c) => codes.includes(c.code)) : COUNTRIES;
 
   useEffect(() => {
     if (!open) return;
@@ -91,7 +94,7 @@ export default function CountryPicker({ id, value, onChange, labelledBy }) {
           aria-labelledby={labelledBy}
           onKeyDown={onListKey}
         >
-          {COUNTRIES.map((c) => (
+          {options.map((c) => (
             <li
               key={c.code}
               role="option"

@@ -8,7 +8,18 @@ import Toast, { useToast } from "../../components/admin/Toast";
 import { Badge, StatusBadge } from "../../components/admin/OrdersTable";
 import { paymentBadge, paymentLabel, rupees } from "../../components/admin/format";
 import { sized } from "../../utils/format";
+import { formatMinor } from "../../utils/pricing";
 import "./OrderDetail.css";
+
+// What the customer was actually charged when it wasn't rupees: US/UK orders and PayPal
+// (spec 008 AC-6.2). The rupee sums above stay the store's books (R-5).
+const chargedOf = (o) => {
+  if (o.charge && o.charge.currency !== "PKR") {
+    return { amount: formatMinor(o.charge.total, o.charge.currency), rate: o.charge.rate, currency: o.charge.currency };
+  }
+  if (o.paypal?.usd) return { amount: `$${o.paypal.usd}`, rate: o.paypal.rate, currency: "USD" }; // spec 004 orders
+  return null;
+};
 
 const fullDate = (d) =>
   new Date(d).toLocaleString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit" }).replace(" PM", " pm").replace(" AM", " am");
@@ -153,7 +164,7 @@ export default function OrderDetail() {
   const canShip = order.status === "Pending";
   const canDeliver = ["Pending", "Shipped"].includes(order.status);
   const canCancel = ["Awaiting payment", "Pending", "Shipped"].includes(order.status);
-  const addressText = [`${a.firstName} ${a.lastName}`, a.address, a.apartment, [a.city, a.postalCode].filter(Boolean).join(" "), a.country, order.phone]
+  const addressText = [`${a.firstName} ${a.lastName}`, a.address, a.apartment, [a.city, a.state, a.postalCode].filter(Boolean).join(" "), a.country, order.phone]
     .filter(Boolean)
     .join("\n");
 
@@ -279,6 +290,12 @@ export default function OrderDetail() {
                 <dt>Total</dt>
                 <dd>{rupees(order.totalPrice)}</dd>
               </div>
+              {chargedOf(order) && (
+                <div className="od-sums__charged">
+                  <dt>Charged in {chargedOf(order).currency}</dt>
+                  <dd>{chargedOf(order).amount}</dd>
+                </div>
+              )}
               <div className="od-sums__paid">
                 <dt>{order.isPaid ? "Paid by customer" : order.status === "Cancelled" ? "Not collected" : order.paymentMethod === "COD" ? "To collect on delivery" : order.paymentMethod === "PayPal" ? "Awaiting PayPal payment" : "Awaiting card payment"}</dt>
                 <dd>{rupees(order.isPaid ? order.totalPrice : order.status === "Cancelled" ? 0 : order.totalPrice)}</dd>
@@ -286,11 +303,17 @@ export default function OrderDetail() {
             </dl>
             {order.paymentMethod === "PayPal" ? (
               <p className="od-small adm-muted">
-                {paymentLabel(order, { admin: true })} · ${order.paypal?.usd} at Rs {order.paypal?.rate}/USD
+                {paymentLabel(order, { admin: true })} · {chargedOf(order)?.amount} at Rs {chargedOf(order)?.rate}/{chargedOf(order)?.currency}
                 {order.paypal?.captureId && <> · transaction {order.paypal.captureId}</>}
               </p>
             ) : (
-              order.paymentResult?.id && <p className="od-small adm-muted">Stripe payment: {order.paymentResult.id}</p>
+              (order.paymentResult?.id || chargedOf(order)) && (
+                <p className="od-small adm-muted">
+                  {chargedOf(order) && <>Card · {chargedOf(order).amount} at Rs {chargedOf(order).rate}/{chargedOf(order).currency}</>}
+                  {chargedOf(order) && order.paymentResult?.id && " · "}
+                  {order.paymentResult?.id && <>Stripe payment: {order.paymentResult.id}</>}
+                </p>
+              )
             )}
           </section>
 
@@ -372,12 +395,12 @@ export default function OrderDetail() {
         <p>The order will be marked as cancelled and can&rsquo;t be reopened.</p>
         {order.paymentMethod === "PayPal" && order.isPaid && order.paypal?.mode !== "simulated" && (
           <p>
-            <strong>This order was paid with PayPal.</strong> Cancelling here doesn&rsquo;t move money — refund ${order.paypal?.usd} from your PayPal account.
+            <strong>This order was paid with PayPal.</strong> Cancelling here doesn&rsquo;t move money — refund {chargedOf(order)?.amount} from your PayPal account.
           </p>
         )}
         {order.paymentMethod === "Card" && order.isPaid && (
           <p>
-            <strong>This order was paid by card.</strong> Cancelling here doesn&rsquo;t move money — refund {rupees(order.totalPrice)} from your Stripe dashboard.
+            <strong>This order was paid by card.</strong> Cancelling here doesn&rsquo;t move money — refund {chargedOf(order)?.amount || rupees(order.totalPrice)} from your Stripe dashboard.
           </p>
         )}
       </ConfirmDialog>

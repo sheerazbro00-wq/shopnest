@@ -159,6 +159,59 @@
   margin-bottom: 11px;
 }
 
+/* spec 008: three fields in a row (US City / State / ZIP); City takes its own row on phones */
+.co-row--3 {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (max-width: 560px) {
+  /* .co-row stacks on phones; keep State + ZIP side by side under a full-width City */
+  .co-row.co-row--3 {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .co-row--3 > :first-child {
+    grid-column: 1 / -1;
+  }
+}
+
+/* spec 008: the store's country picker, sized like the checkout fields */
+.co-country {
+  margin-bottom: 11px;
+}
+
+.co-country__label {
+  margin: 0 0 6px;
+  color: var(--co-muted);
+  font-size: 12px;
+}
+
+.co-country .cpick__button {
+  height: 49px;
+  padding: 0 11px;
+  border-color: var(--co-border);
+  border-radius: var(--co-radius);
+  font-size: 14px;
+}
+
+.co-country .cpick__button:hover,
+.co-country .cpick.is-open .cpick__button {
+  border-color: #000;
+}
+
+.co-country .cpick__option {
+  font-size: 14px;
+}
+
+.co-country .cpick__option:first-child {
+  border-radius: var(--co-radius) var(--co-radius) 0 0;
+}
+
+.co-country .cpick__option:last-child {
+  border-radius: 0 0 var(--co-radius) var(--co-radius);
+}
+
 .co-field input,
 .co-field select {
   display: block;
@@ -400,17 +453,6 @@
   border-radius: var(--co-radius);
   background: #fff4f4;
   color: #8a1010;
-}
-
-/* spec 007: rupee charge note for shoppers browsing in $ or £ */
-.co-charge-note {
-  margin: 20px 0 0;
-  padding: 12px 16px;
-  border-radius: var(--co-radius);
-  background: var(--co-bg-dim);
-  font-size: 14px;
-  line-height: 1.5;
-  text-align: center;
 }
 
 /* submit */
