@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Approved (2026-10-07) — shipping proposal in §6 accepted |
+| **Status** | Done (2026-10-07) |
 | **Owner** | ShopNest |
 | **Created** | 2026-10-07 |
 | **Builds on** | [Spec 007 — Country & currency](../007-country-currency/spec.md), [Spec 004 — PayPal](../004-paypal/spec.md) |

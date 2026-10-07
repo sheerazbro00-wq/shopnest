@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Approved (2026-10-07) |
+| **Status** | Done (2026-10-07) |
 | **Spec** | [spec.md](spec.md) |
 
 How we'll build [Spec 008](spec.md). Section numbers (§) are referenced from `tasks.md`.
