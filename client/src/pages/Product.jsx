@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { fetchProduct } from "../api/products";
 import { MAX_QTY, useCart } from "../context/CartContext";
-import { formatPrice } from "../utils/format";
+import { useMoney } from "../context/CurrencyContext";
 import { addRecentlyViewed } from "../utils/recentlyViewed";
 import QtySelector from "../components/common/QtySelector";
 import ProductGallery from "../components/product/ProductGallery";
@@ -78,6 +78,7 @@ export default function Product() {
 }
 
 function ProductSingle({ product }) {
+  const money = useMoney();
   const variants = product.variants || [];
   const [size, setSize] = useState(() => (variants.find((v) => v.available) || variants[0])?.size);
   const [qty, setQty] = useState(1);
@@ -155,11 +156,11 @@ function ProductSingle({ product }) {
           {onSale && (
             <>
               <span className="visually-hidden">Regular price</span>
-              <s className="product__price product__price--compare">{formatPrice(compareAt)}</s>
+              <s className="product__price product__price--compare">{money(compareAt)}</s>
               <span className="visually-hidden">Sale price</span>
             </>
           )}
-          <span className="product__price">{formatPrice(price)}</span>
+          <span className="product__price">{money(price)}</span>
           {onSale && (
             <span className="product__price-savings">Save {Math.round((1 - price / compareAt) * 100)}%</span>
           )}

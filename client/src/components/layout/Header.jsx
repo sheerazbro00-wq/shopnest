@@ -6,6 +6,7 @@ import { useAuth } from "../../context/AuthContext";
 import Logo from "./Logo";
 import MobileNav from "./MobileNav";
 import SearchOverlay from "../search/SearchOverlay";
+import CurrencySwitcher from "../currency/CurrencySwitcher";
 import { SearchIcon, UserIcon, BagIcon, MenuIcon } from "../Icons";
 import "./Header.css";
 
@@ -76,6 +77,7 @@ export default function Header() {
           </nav>
 
           <div className="header-item header-item--icons">
+            <CurrencySwitcher />
             <Link
               ref={searchBtnRef}
               to="/search"

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { mainMenu } from "../../data/navigation";
 import { useAuth } from "../../context/AuthContext";
 import { CloseIcon, InstagramIcon, FacebookIcon, YoutubeIcon, TiktokIcon } from "../Icons";
+import { CurrencySelect } from "../currency/CurrencySwitcher";
 import "./MobileNav.css";
 
 const socials = [
@@ -67,6 +68,8 @@ export default function MobileNav({ open, onClose }) {
             <Link to={user ? "/account" : "/account/login"} className="mobile-nav__login" onClick={onClose}>
               {user ? "My Account" : "Log in"}
             </Link>
+
+            <CurrencySelect />
 
             <ul className="mobile-nav__social">
               {socials.map(({ label, Icon }) => (

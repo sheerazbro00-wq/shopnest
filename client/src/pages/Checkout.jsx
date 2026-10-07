@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
+import { useCurrency } from "../context/CurrencyContext";
 import { errorMessage, fetchCheckoutConfig, placeOrder } from "../api/orders";
 import { fetchAccount } from "../api/account";
 import { CITIES } from "../data/cities";
@@ -58,6 +59,7 @@ function validate(f) {
 export default function Checkout() {
   const { items, subtotal, clearCart } = useCart();
   const { user } = useAuth();
+  const { currency, money: shopperMoney } = useCurrency();
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const canceled = params.get("canceled");
@@ -344,6 +346,14 @@ export default function Checkout() {
           <h2>Order summary</h2>
           {summary}
         </section>
+
+        {/* Until spec 008 every order is charged in rupees: say so plainly (spec 007 US-4).
+            PayPal already shows its own dollar amount above. */}
+        {currency !== "PKR" && form.paymentMethod !== "PayPal" && (
+          <p className="co-charge-note">
+            You&apos;ll be charged <strong>{money(total)}</strong> (about {shopperMoney(total)}).
+          </p>
+        )}
 
         {form.paymentMethod === "PayPal" && paypalEnabled ? (
           <PayPalButton submitting={submitting} disabled={submitting || !config} />

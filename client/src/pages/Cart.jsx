@@ -1,13 +1,14 @@
 import { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "../context/CartContext";
-import { formatPrice } from "../utils/format";
+import { useMoney } from "../context/CurrencyContext";
 import CartLineItem from "../components/cart/CartLineItem";
 import RecentlyViewed from "../components/product/RecentlyViewed";
 import "./Cart.css";
 
 export default function Cart() {
   const { items, subtotal, hasSoldOut } = useCart();
+  const money = useMoney();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -36,7 +37,7 @@ export default function Cart() {
             <div className="cart__page-col cart__summary">
               <div className="cart__summary-row">
                 <span>Subtotal</span>
-                <span>{formatPrice(subtotal)}</span>
+                <span>{money(subtotal)}</span>
               </div>
               <button type="button" className="btn cart__checkout" disabled={hasSoldOut} onClick={() => navigate("/checkout")}>
                 Check out

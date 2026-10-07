@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
-import { formatPrice, sized, srcSet } from "../../utils/format";
+import { sized, srcSet } from "../../utils/format";
+import { useMoney } from "../../context/CurrencyContext";
 import { ChevronLeft, ChevronRight } from "../Icons";
 import "./ProductCard.css";
 
@@ -18,6 +19,7 @@ export default function ProductCard({ product, sizesAttr = "(max-width: 768px) 8
   const [slide, setSlide] = useState(0);
   const [quickAdd, setQuickAdd] = useState(false);
   const { addItem } = useCart();
+  const money = useMoney();
 
   const images = active.images?.length ? active.images : [];
   const onSale = active.compareAtPrice && active.compareAtPrice > active.price;
@@ -95,8 +97,8 @@ export default function ProductCard({ product, sizesAttr = "(max-width: 768px) 8
       <Link to={`/products/${active.handle}`} className="grid-product__meta">
         <div className="grid-product__title">{product.title}</div>
         <div className="grid-product__price">
-          {onSale && <s className="grid-product__price--original">{formatPrice(active.compareAtPrice)}</s>}
-          <span className={onSale ? "grid-product__price--sale" : ""}>{formatPrice(active.price)}</span>
+          {onSale && <s className="grid-product__price--original">{money(active.compareAtPrice)}</s>}
+          <span className={onSale ? "grid-product__price--sale" : ""}>{money(active.price)}</span>
         </div>
       </Link>
 

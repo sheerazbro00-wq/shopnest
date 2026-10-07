@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { footerLinks } from "../../data/navigation";
 import { store } from "../../data/store";
+import { useCurrency } from "../../context/CurrencyContext";
 import { ChevronDown, EmailIcon, InstagramIcon, FacebookIcon, YoutubeIcon, TiktokIcon } from "../Icons";
 import "./Footer.css";
 
@@ -37,6 +38,7 @@ export default function Footer() {
   const [open, setOpen] = useState(null);
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const { currency, credit } = useCurrency();
   const toggle = (key) => setOpen((o) => (o === key ? null : key));
 
   return (
@@ -132,6 +134,15 @@ export default function Footer() {
         </div>
 
         <p className="site-footer__copyright">© {new Date().getFullYear()} ShopNest</p>
+        {/* The rate provider asks for credit (spec 007 R-4) — only shown when its rates are in use. */}
+        {currency !== "PKR" && credit && (
+          <p className="site-footer__credit">
+            Prices converted from PKR at today&apos;s rate.{" "}
+            <a href={credit.url} target="_blank" rel="noopener noreferrer">
+              Rates by {credit.name}
+            </a>
+          </p>
+        )}
       </div>
     </footer>
   );

@@ -166,6 +166,20 @@
   text-align: center;
 }
 
+.site-footer__credit {
+  margin: 0;
+  padding-bottom: 8px;
+  color: #777;
+  font-size: 11.5px;
+  text-align: center;
+}
+
+.site-footer__credit a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 @media (max-width: 768px) {
   .site-footer {
     padding: 0;

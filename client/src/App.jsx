@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect } from "react";
 import { BrowserRouter, Navigate, Routes, Route, useLocation } from "react-router-dom";
 import { CartProvider } from "./context/CartContext";
 import { AuthProvider } from "./context/AuthContext";
+import { CurrencyProvider } from "./context/CurrencyContext";
 import AnnouncementBar from "./components/layout/AnnouncementBar";
 import Header from "./components/layout/Header";
 import Footer from "./components/layout/Footer";
@@ -29,6 +30,7 @@ import Orders from "./pages/account/Orders";
 import OrderDetail from "./pages/account/OrderDetail";
 import Profile from "./pages/account/Profile";
 import CartDrawer from "./components/cart/CartDrawer";
+import CountryPopup from "./components/currency/CountryPopup";
 import { SignOutOnArrival } from "./components/account/AccountLayout";
 import ComingSoon from "./pages/ComingSoon";
 
@@ -116,6 +118,7 @@ function Shell() {
         <Footer />
       </div>
       <CartDrawer />
+      <CountryPopup />
       <SignOutOnArrival />
     </>
   );
@@ -124,12 +127,14 @@ function Shell() {
 function App() {
   return (
     <BrowserRouter>
-      <AuthProvider>
-        <CartProvider>
-          <ScrollToTop />
-          <Shell />
-        </CartProvider>
-      </AuthProvider>
+      <CurrencyProvider>
+        <AuthProvider>
+          <CartProvider>
+            <ScrollToTop />
+            <Shell />
+          </CartProvider>
+        </AuthProvider>
+      </CurrencyProvider>
     </BrowserRouter>
   );
 }

@@ -1,13 +1,14 @@
 import { useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useCart } from "../../context/CartContext";
-import { formatPrice } from "../../utils/format";
+import { useMoney } from "../../context/CurrencyContext";
 import { CloseIcon } from "../Icons";
 import CartLineItem from "./CartLineItem";
 import "./CartDrawer.css";
 
 export default function CartDrawer() {
   const { items, subtotal, hasSoldOut, drawerOpen, closeCart } = useCart();
+  const money = useMoney();
   const closeRef = useRef(null);
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -56,7 +57,7 @@ export default function CartDrawer() {
             <div className="cart-drawer__footer">
               <div className="cart-drawer__subtotal">
                 <span className="cart-drawer__subtotal-label">Subtotal</span>
-                <span>{formatPrice(subtotal)}</span>
+                <span>{money(subtotal)}</span>
               </div>
               <p className="cart__note">Shipping, taxes, and discount codes calculated at checkout.</p>
               <button

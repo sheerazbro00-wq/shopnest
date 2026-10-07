@@ -10,6 +10,7 @@ const orderRoutes = require("./routes/orderRoutes");
 const accountRoutes = require("./routes/accountRoutes");
 const contactRoutes = require("./routes/contactRoutes");
 const adminRoutes = require("./routes/adminRoutes");
+const currencyRoutes = require("./routes/currencyRoutes");
 const { stripeWebhook } = require("./controllers/orderController");
 
 const app = express();
@@ -45,6 +46,7 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/account", accountRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/admin", adminRoutes);
+app.use("/api/currency", currencyRoutes);
 
 app.use((err, req, res, next) => {
   const status = err.status || 500;

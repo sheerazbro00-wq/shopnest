@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { MAX_QTY, useCart } from "../../context/CartContext";
-import { formatPrice, sized } from "../../utils/format";
+import { sized } from "../../utils/format";
+import { useMoney } from "../../context/CurrencyContext";
 import QtySelector from "../common/QtySelector";
 import "./CartLineItem.css";
 
@@ -8,6 +9,7 @@ import "./CartLineItem.css";
 // column; the drawer version removes a line by stepping quantity to 0.
 export default function CartLineItem({ item, layout = "drawer", onNavigate }) {
   const { updateQty, removeItem } = useCart();
+  const money = useMoney();
   const url = `/products/${item.handle}`;
   const lineTotal = item.price * item.qty;
 
@@ -53,7 +55,7 @@ export default function CartLineItem({ item, layout = "drawer", onNavigate }) {
             )}
           </div>
           <div className="cart__item-price-col">
-            <span className="cart__price">{formatPrice(lineTotal)}</span>
+            <span className="cart__price">{money(lineTotal)}</span>
           </div>
         </div>
       </div>
