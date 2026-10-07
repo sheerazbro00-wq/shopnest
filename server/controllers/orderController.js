@@ -219,6 +219,8 @@ const checkout = async (req, res) => {
       // Checkout offers "Debit - Credit Card". In USD Stripe would also add Cash App, bank
       // transfer and Klarna; bank payments settle days later, which this flow doesn't handle.
       payment_method_types: ["card"],
+      // Link (Stripe's wallet) would still add its own "Bank" and "Klarna" options on top.
+      wallet_options: { link: { display: "never" } },
       customer_email: customer.email,
       client_reference_id: String(order._id),
       metadata: { orderId: String(order._id), orderNumber: String(order.orderNumber) },

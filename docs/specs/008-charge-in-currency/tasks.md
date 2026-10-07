@@ -30,6 +30,6 @@
 - [x] **T3.6** Browser checks 1440 / 390 incl. a full US card payment (4242). [§7.3]
 
 ## Phase 4 — Live
-- [ ] **T4.1** Push; live smoke test (config, US quote).
+- [x] **T4.1** Push; live smoke test (config, US quote).
 - [ ] **T4.2** Owner tests: US card, UK PayPal, PK COD (Definition of Done).
 - [ ] **T4.3** Mark Done.

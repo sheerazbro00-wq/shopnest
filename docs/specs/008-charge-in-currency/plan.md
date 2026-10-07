@@ -136,6 +136,8 @@ the live USD rate from `getRates()` (spec AC-4.2).
      - `payment_method_types: ["card"]` *(found in testing)*: in USD, Stripe also adds Cash App,
        bank transfer and Klarna. Bank payments settle days later, which this flow doesn't
        handle, and the checkout only offers card.
+     - `wallet_options: { link: { display: "never" } }` *(found by the owner on a phone)*: Link,
+       Stripe's wallet, still added its own "Bank ($5 back)" and "Klarna" options on top of card.
    - **PayPal:** `amount: { currency_code: charge.currency, value: (total/100).toFixed(2) }`.
 
 `getCheckoutConfig` adds `{ rates, countries, shipping }`. It is sent `Cache-Control:
