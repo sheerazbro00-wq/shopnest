@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | Approved (2026-10-07) |
+| **Status** | Done (2026-10-07) |
 | **Owner** | ShopNest |
 | **Created** | 2026-10-07 |
 | **Followed by** | Spec 008 — Charge in the shopper's currency |

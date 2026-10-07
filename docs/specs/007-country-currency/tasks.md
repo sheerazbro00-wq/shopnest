@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | In progress |
+| **Status** | Done (2026-10-07) — owner tested on the live store |
 | **Spec / plan** | [spec.md](spec.md) · [plan.md](plan.md) |
 
 ## Phase 1 — Server rates
@@ -26,5 +26,5 @@
 
 ## Phase 4 — Live
 - [x] **T4.1** Push; check `/api/currency` live and the CDN header.
-- [ ] **T4.2** Owner tests on desktop + phone (Definition of Done).
-- [ ] **T4.3** Mark Done.
+- [x] **T4.2** Owner tests on desktop + phone (Definition of Done).
+- [x] **T4.3** Mark Done.
