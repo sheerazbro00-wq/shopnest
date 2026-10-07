@@ -1,11 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { useCurrency } from "../../context/CurrencyContext";
-import { COUNTRIES } from "../../utils/currency";
-import { ChevronDown, CloseIcon } from "../Icons";
-import Flag from "./Flag";
+import { CloseIcon } from "../Icons";
+import CountryPicker from "./CountryPicker";
 import "./Currency.css";
-
-const optionLabel = (c) => `${c.name} — ${c.currency} (${c.symbol})`;
 
 // First-visit "Where are you from?" (spec 007 US-1). Opens over whatever page the
 // shopper landed on; any way of closing it counts as choosing Pakistan (AC-1.5).
@@ -27,10 +24,9 @@ function Dialog() {
   const { setCountry } = useCurrency();
   const [code, setCode] = useState("PK"); // AC-1.3
   const cardRef = useRef(null);
-  const selectRef = useRef(null);
 
   useEffect(() => {
-    selectRef.current?.focus({ preventScroll: true });
+    document.getElementById("cp-country")?.focus({ preventScroll: true });
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
@@ -89,20 +85,10 @@ function Dialog() {
         </p>
 
         <form className="cp-form" onSubmit={submit}>
-          <label htmlFor="cp-country" className="cp-label">
+          <p id="cp-label" className="cp-label">
             Where are you from?
-          </label>
-          <div className="cp-select">
-            <Flag code={code} className="cp-select__flag" />
-            <select id="cp-country" ref={selectRef} value={code} onChange={(e) => setCode(e.target.value)}>
-              {COUNTRIES.map((c) => (
-                <option key={c.code} value={c.code}>
-                  {optionLabel(c)}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="cp-select__chevron" />
-          </div>
+          </p>
+          <CountryPicker id="cp-country" labelledBy="cp-label" value={code} onChange={setCode} />
           <button type="submit" className="cp-continue">
             Continue shopping
           </button>

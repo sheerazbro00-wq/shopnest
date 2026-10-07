@@ -3,6 +3,7 @@ import { useCurrency } from "../../context/CurrencyContext";
 import { COUNTRIES } from "../../utils/currency";
 import { ChevronDown } from "../Icons";
 import Flag from "./Flag";
+import CountryPicker from "./CountryPicker";
 import "./Currency.css";
 
 // Header "🇺🇸 USD ▾" menu (spec 007 US-3). Hidden when there are no rates (AC-5.3).
@@ -88,26 +89,16 @@ export default function CurrencySwitcher() {
   );
 }
 
-// Native select for the phone menu drawer (AC-3.1).
+// The same store-styled dropdown, for the phone menu drawer (AC-3.1).
 export function CurrencySelect({ className = "" }) {
   const { available, country, setCountry } = useCurrency();
   if (!available) return null;
   return (
     <div className={`cur-select ${className}`}>
-      <label htmlFor="cur-select" className="cur-select__label">
+      <p id="cur-select-label" className="cur-select__label">
         Country / currency
-      </label>
-      <div className="cp-select">
-        <Flag code={country.code} className="cp-select__flag" />
-        <select id="cur-select" value={country.code} onChange={(e) => setCountry(e.target.value)}>
-          {COUNTRIES.map((c) => (
-            <option key={c.code} value={c.code}>
-              {c.name} — {c.currency} ({c.symbol})
-            </option>
-          ))}
-        </select>
-        <ChevronDown className="cp-select__chevron" />
-      </div>
+      </p>
+      <CountryPicker id="cur-select" labelledBy="cur-select-label" value={country.code} onChange={setCountry} />
     </div>
   );
 }

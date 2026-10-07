@@ -25,6 +25,6 @@
 - [x] **T3.5** Browser checks at 1440 px and 390 px, incl. blocked storage. [§6.3]
 
 ## Phase 4 — Live
-- [ ] **T4.1** Push; check `/api/currency` live and the CDN header.
+- [x] **T4.1** Push; check `/api/currency` live and the CDN header.
 - [ ] **T4.2** Owner tests on desktop + phone (Definition of Done).
 - [ ] **T4.3** Mark Done.

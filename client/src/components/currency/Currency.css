@@ -39,6 +39,9 @@
   flex-direction: column;
   align-items: center;
   width: min(420px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 44px 36px 30px;
   border-radius: 14px;
   background: #fff;
@@ -120,50 +123,151 @@
   font-weight: 500;
 }
 
-/* A native select (the phone's own picker) with the chosen flag drawn on its left. */
-.cp-select {
-  position: relative;
-  display: flex;
-  align-items: center;
+/* Store-styled country dropdown (CountryPicker). The list opens inline and
+   pushes content down, so it can't fall off the bottom of a phone sheet. */
+.cpick {
+  width: 100%;
 }
 
-.cp-select select {
+.cpick__button,
+.cpick__option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   width: 100%;
+  color: #000;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.cpick__button {
   height: 52px;
-  padding: 0 44px 0 46px;
+  padding: 0 16px;
   border: 1px solid #cfcfcf;
   border-radius: 8px;
   background: #fff;
-  color: #000;
-  font: inherit;
-  font-size: 16px; /* 16px stops iOS zooming in on focus */
-  appearance: none;
-  cursor: pointer;
+  font-size: 16px;
   transition: border-color 0.15s ease;
 }
 
-.cp-select select:hover,
-.cp-select select:focus-visible {
+.cpick__button:hover,
+.cpick.is-open .cpick__button {
   border-color: #000;
 }
 
-.cp-select select:focus-visible {
+.cpick__button:focus-visible {
+  border-color: #000;
   outline: 2px solid #000;
   outline-offset: 2px;
 }
 
-.cp-select__flag {
-  position: absolute;
-  left: 16px;
-  pointer-events: none;
+.cpick__name {
+  flex: 1;
+  min-width: 0;
 }
 
-.cp-select__chevron {
-  position: absolute;
-  right: 16px;
+.cpick__cur {
+  color: #777;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.cpick__chevron {
+  flex: 0 0 auto;
   width: 14px;
   height: 14px;
-  pointer-events: none;
+  transition: transform 0.2s ease;
+}
+
+.cpick.is-open .cpick__chevron {
+  transform: rotate(180deg);
+}
+
+.cpick__panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.22s ease;
+}
+
+.cpick.is-open .cpick__panel {
+  grid-template-rows: 1fr;
+}
+
+.cpick__list {
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  list-style: none;
+  visibility: hidden;
+  transition: visibility 0s linear 0.22s;
+}
+
+.cpick.is-open .cpick__list {
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+/* the bordered card sits inside the clipped list, so it slides open cleanly */
+.cpick__list::before {
+  content: "";
+  display: block;
+  height: 6px;
+}
+
+.cpick__option {
+  min-height: 50px;
+  padding: 0 16px;
+  border: 1px solid #e3e3e3;
+  border-top-width: 0;
+  background: #fff;
+  font-size: 15px;
+  transition: background-color 0.12s ease;
+}
+
+.cpick__option:first-child {
+  border-top-width: 1px;
+  border-radius: 8px 8px 0 0;
+}
+
+.cpick__option:last-child {
+  border-radius: 0 0 8px 8px;
+}
+
+.cpick__option:focus-visible {
+  background: #f5f5f5;
+  outline: none;
+}
+
+/* touch screens keep :hover stuck after a tap, so hover tint is for mice only */
+@media (hover: hover) {
+  .cpick__option:hover {
+    background: #f5f5f5;
+  }
+}
+
+.cpick__option[aria-selected="true"] {
+  font-weight: 600;
+}
+
+.cpick__check {
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  opacity: 0;
+}
+
+.cpick__option[aria-selected="true"] .cpick__check {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cpick__panel,
+  .cpick__chevron {
+    transition: none;
+  }
 }
 
 .cp-continue {
@@ -226,6 +330,7 @@
 
   .cp-card {
     width: 100%;
+    max-height: 94dvh;
     padding: 30px 20px calc(24px + env(safe-area-inset-bottom));
     border-radius: 18px 18px 0 0;
     animation: cp-rise 0.32s cubic-bezier(0.2, 0.8, 0.2, 1);
