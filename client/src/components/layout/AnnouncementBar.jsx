@@ -5,7 +5,8 @@ import "./AnnouncementBar.css";
 export default function AnnouncementBar() {
   const { currency, money } = useCurrency();
   // Rupees keep the original wording; other currencies show the converted amount (spec 007).
-  const threshold = currency === "PKR" ? `Rs. ${store.freeShippingMin}` : money(store.freeShippingMin);
+  // USD/GBP shoppers ship abroad, so they get the international threshold (spec 008).
+  const threshold = currency === "PKR" ? `Rs. ${store.freeShippingMin}` : money(store.intlFreeShippingMin);
 
   return (
     <div className="announcement-bar">

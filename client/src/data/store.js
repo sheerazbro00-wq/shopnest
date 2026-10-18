@@ -10,6 +10,8 @@ export const store = {
   // Mirrors server/config/shop.js (the server re-prices every order; these are for copy only)
   freeShippingMin: 2500,
   shippingFee: 250,
+  // USA / UK (spec 008)
+  intlFreeShippingMin: 30000,
   opens: "10:00 AM",
   closes: "7:00 PM",
   hours: "10:00 AM to 7:00 PM (PST)",
